@@ -1,0 +1,43 @@
+.main-layout {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.Content {
+    margin-top: 10px;
+    min-height: 100vh;
+    width: 100%;
+    overflow-y: auto;
+    border-radius: 10px;
+    background-color: #1d1d1d;
+}
+
+/* Content */
+.sub-content {
+    /* margin-top: 10px; */
+    margin-left: 10px;
+}
+
+.heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.heading h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.heading h3 {
+    margin-right: 20px;
+    margin-top: 5px;
+    font-size: 0.9rem;
+    font-weight: 1000;
+    color: rgb(182, 182, 182);
+}
+
+

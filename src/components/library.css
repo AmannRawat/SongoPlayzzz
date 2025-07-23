@@ -1,0 +1,38 @@
+.remove-btn {
+  /* margin-left: 10px; */
+  margin-top: 8px;
+  background-color: #bf3030;
+  color: black;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+.remove-btn:hover {
+  background-color: #d83838;
+}
+
+.library-actions {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.add-btn {
+  margin-top: 8px;
+  background-color: #1ed760;
+  color: black;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+.add-btn:hover {
+  background-color: #1db954;
+}

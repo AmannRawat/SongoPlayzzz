@@ -1,0 +1,247 @@
+/* Main layout */
+.sub-content {
+  padding: 1rem;
+  max-width: 100%;
+  margin: 0 auto;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Headings */
+.heading h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.heading h3 {
+  font-size: 0.8rem;
+  font-weight: 300;
+  color: #bbb;
+}
+
+/* Search bar */
+.search-bar-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.search-bar {
+  flex: 1;
+  min-width: 240px;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 1rem;
+  border: none;
+  background-color: #101010;
+  color: white;
+}
+
+/* Suggestions NPL */
+
+.autocomplete-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #1e1e1e;
+  border: 1px solid #444;
+  border-top: none;
+  z-index: 10;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  color: white;
+}
+
+.autocomplete-item {
+  padding: 10px 15px;
+  color: white;
+  cursor: pointer;
+  transition : background 0.2s;
+}
+
+.autocomplete-item:hover {
+  background-color: #333;
+}
+
+/* Search button */
+.search-button {
+  padding: 10px 20px;
+  background: linear-gradient(to right, #87026a, #f1217f);
+  border: none;
+  color: white;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.search-button:hover {
+  background-color: #d91c6f;
+}
+
+/* Mood section */
+.mood-section {
+  margin: 2rem 0 1rem;
+  text-align: center;
+}
+
+.mood-heading {
+  font-size: 1.6rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #ffffff;
+}
+
+.mood-toggle-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0 1rem;
+}
+
+.mood-toggle {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  background: linear-gradient(to right, #33003f, #f1217f);
+  color: white;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.mood-toggle:hover {
+  transform: scale(1.05);
+  background: linear-gradient(to right, #440054, #fb2d8a);
+}
+
+.mood-toggle.active {
+  background: linear-gradient(to right, #440054, #fb2d8a);
+}
+
+.mood-result-heading {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #ffffff;
+  margin: 1rem auto 0.5rem;
+  text-align: center;
+}
+
+/* Results list */
+.search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Result card layout */
+.search-card {
+  background-color: #2a2a2a;
+  padding: 14px 18px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.search-card:hover {
+  background-color: #383838;
+}
+
+/* Thumbnail */
+.search-thumbnail {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+/* Info column */
+.search-details {
+  flex: 1;
+  margin-left: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.search-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 4px;
+}
+
+.search-channel {
+  font-size: 0.85rem;
+  color: #aaa;
+}
+
+/* Add to playlist button */
+.add-btn {
+  background-color: #1ed760;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  color: black;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.add-btn:hover {
+  background-color: #1db954;
+}
+
+/* ✅ Mobile Responsive */
+@media (max-width: 768px) {
+  .search-bar-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-bar,
+  .search-button {
+    width: 100%;
+    font-size: 1rem;
+  }
+
+  .search-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .search-thumbnail {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+
+  .search-details {
+    margin: 10px 0;
+  }
+
+  .add-btn {
+    align-self: flex-end;
+  }
+
+  .mood-toggle-container {
+    flex-direction: column;
+    align-items: center;
+  }
+}

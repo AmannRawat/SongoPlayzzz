@@ -1,0 +1,119 @@
+.nav {
+  height: 10vh;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #101010;
+  border-radius: 10px 10px 0 0;
+  padding: 0 10px;
+  margin-left: -5px;
+}
+
+/* Arrows section */
+.Arrows {
+  display: flex;
+  gap: 10px;
+  margin-left: 18px;
+}
+
+.arrow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 2.5vw;
+  height: 2.5vw;
+  background-color: black;
+  border-radius: 100px;
+  cursor: pointer;
+}
+
+.arrow img {
+  width: 1.2vw;
+  border-radius: 50px;
+  filter: invert();
+}
+
+.account {
+  margin-right: 25px;
+  display: flex;
+  gap: 10px;
+}
+
+/* Buttons */
+.btn2 {
+  font-size: 0.99rem;
+  font-weight: 700;
+  color: rgb(182, 182, 182);
+  background-color: #101010;
+  padding: 1.2vw 2vw;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+}
+
+.btn2:hover {
+  color: rgb(255, 255, 255);
+  padding: 1.4vw 2.1vw;
+  font-size: 1rem;
+}
+
+.btn3 {
+  font-size: 0.93rem;
+  font-weight: 600;
+  color: rgb(0, 0, 0);
+  padding: 1.12vw 2.45vw;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  background-color: white;
+}
+
+.btn3:hover {
+  padding: 1.16vw 2.5vw;
+}
+
+/* Responsive Media Query */
+
+@media (max-width: 768px) {
+  .nav {
+    flex-direction: column;
+    height: auto;
+    padding: 15px 10px;
+    gap: 10px;
+  }
+
+  .Arrows {
+    margin-left: 0;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .arrow {
+    width: 40px;
+    height: 40px;
+  }
+
+  .arrow img {
+    width: 18px;
+  }
+
+  .account {
+    margin-right: 0;
+    justify-content: center;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .btn2,
+  .btn3 {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    margin-top: 5px;
+  }
+
+  .btn2:hover,
+  .btn3:hover {
+    padding: 9px 18px;
+    font-size: 0.9rem;
+  }
+}

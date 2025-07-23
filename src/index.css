@@ -1,0 +1,85 @@
+:root {
+    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+
+    color-scheme: light dark;
+    color: rgba(255, 255, 255, 0.87);
+    background-color: #242424;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* index.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Roboto", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  color: white;
+}
+
+body {
+  background-color: black;
+  overflow-x: hidden;
+}
+
+
+h1, h2 {
+  font-size: clamp(1.2rem, 5vw, 2rem);
+}
+.search-title {
+  font-size: clamp(0.9rem, 1.8vw, 1.2rem);
+}
+/* Style the scrollbar container */
+::-webkit-scrollbar {
+    width: 9px;
+}
+
+/* Style the scrollbar track (background) */
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Style the scrollbar thumb (draggable part) */
+::-webkit-scrollbar-thumb {
+    background: #454545;
+    border-radius: 20px;
+}
+
+/* Style the scrollbar thumb when hovered */
+::-webkit-scrollbar-thumb:hover {
+    background: #ababab;
+    cursor: grabbing;
+}
+
+/* Making Responsive */
+html {
+  font-size: 100%;
+}
+
+@media (max-width: 1024px) {
+  html {
+    font-size: 95%;
+  }
+}
+
+@media (max-width: 768px) {
+  html {
+    font-size: 90%;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 85%;
+  }
+  body {
+     overflow-x: hidden;
+  }
+}
