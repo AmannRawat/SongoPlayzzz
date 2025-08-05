@@ -24,53 +24,29 @@ const Playbar = ({
   const seekbarRef = useRef(null);
   const isSeeking = useRef(false);
 
-  // Effect to control playback (play/pause)
-  // useEffect(() => {
-  //   const isYoutube = currentSong?.source === 'youtube';
-  //   const isLocal = currentSong?.source === 'local';
-
-  //   if (isPlaying) {
-  //     if (isYoutube && playerRef.current) {
-  //       playerRef.current.playVideo();
-  //     }
-  //     if (isLocal && audioRef.current) {
-  //       audioRef.current.play().catch(e => console.error("Audio play error:", e));
-  //     }
-  //   } else {
-  //     if (isYoutube && playerRef.current) {
-  //       playerRef.current.pauseVideo();
-  //     }
-  //     if (isLocal && audioRef.current) {
-  //       audioRef.current.pause();
-  //     }
-  //   }
-  // }, [isPlaying, currentSong]);
-
+  if (!currentSong) {
+    return null; // Don't render anything if there's no song
+  }
   // A single, robust useEffect to handle all playback logic for local and YouTube
   useEffect(() => {
     const isYoutube = currentSong?.source === 'youtube';
     const isLocal = currentSong?.source === 'local';
 
-    // Logic for LOCAL songs
+    // --- Logic for LOCAL songs ---
     if (isLocal && audioRef.current) {
-      // 1. If the song has changed, update the audio element's source
       if (audioRef.current.src !== currentSong.url) {
         audioRef.current.src = currentSong.url;
-        // Because we've set a new src, the audio element is not yet ready to play.
-        // We rely on the `onLoadedMetadata` event to set the duration.
       }
-
-      // 2. Control playback based on the `isPlaying` state
       if (isPlaying) {
-        // The `play()` command here is crucial for both initial play and resuming from pause
         audioRef.current.play().catch(e => console.error("Audio play error:", e));
       } else {
         audioRef.current.pause();
       }
     }
 
-    // Logic for YOUTUBE songs
-    if (isYoutube && playerRef.current) {
+    // --- Logic for YOUTUBE songs ---
+    // (1) ADDED A GUARD CLAUSE here to match the JSX
+    if (isYoutube && playerRef.current && currentSong.id?.videoId) {
       if (isPlaying) {
         playerRef.current.playVideo();
       } else {
@@ -78,7 +54,16 @@ const Playbar = ({
       }
     }
 
-    // Make sure to include all dependencies.
+    // (2) ADDED A CLEANUP FUNCTION to prevent race conditions
+    // This function runs BEFORE the effect runs again, or when the component unmounts.
+    return () => {
+      if (isLocal && audioRef.current) {
+        audioRef.current.pause(); // Pause the local player when switching
+      }
+      if (isYoutube && playerRef.current) {
+        playerRef.current.pauseVideo(); // Pause the YouTube player when switching
+      }
+    };
   }, [currentSong, isPlaying]); // The dependencies are what trigger this effect to run.
 
   // Effect to handle volume
@@ -139,7 +124,6 @@ const Playbar = ({
     }
   };
 
-  // Update progress from YouTube player
   // Effect to handle YouTube progress updates
   useEffect(() => {
     const interval = setInterval(() => {
@@ -246,24 +230,7 @@ const Playbar = ({
     setVolume(newMutedState ? 0 : 0.5);
   };
 
-  if (!currentSong) {
-    return null;
-  }
 
-  useEffect(() => {
-    if (currentSong?.source === 'local' && audioRef.current) {
-      // Check if the current song URL has changed
-      if (audioRef.current.src !== currentSong.url) {
-        audioRef.current.src = currentSong.url;
-      }
-      if (isPlaying) {
-        // We ensure playback is triggered after the song URL is set
-        audioRef.current.play().catch(e => console.error("Audio play error:", e));
-      } else {
-        audioRef.current.pause();
-      }
-    }
-  }, [currentSong, isPlaying]);
   return (
     <div className="playbar">
       {currentSong?.source === 'local' && (

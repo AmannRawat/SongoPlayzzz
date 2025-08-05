@@ -77,8 +77,8 @@ const Content = ({
     },
   ];
 
-  const handlePlayForYouSong = (song) => {
-    setCurrentSong(song);
+  const handlePlayForYouSong = (song) => {   //Function For For You section of home page
+    setCurrentSong({ ...song, source: 'local' });
     setIsPlaying(true);
 
     // Set the playlist to the new array of hardcoded songs
@@ -422,21 +422,30 @@ const Content = ({
                 }
                 css="pic1"
                 onPlay={() => {
-                  // Create the song object with the correct structure for App.jsx
-                  setCurrentSong({
+                  // 1. Create a new playlist where every song has our standard structure
+                  const normalizedPlaylist = results.map(videoItem => ({
                     source: 'youtube',
-                    title: video.snippet.title,
-                    artist: video.snippet.channelTitle,
-                    thumbnail: video.snippet.thumbnails.medium.url,
-                    id: { videoId: video.id }
-                  });
-                  setSelectedIndex(null); //  prevent conflict with Search
-                  setIsPlaying(true);
+                    title: videoItem.snippet.title,
+                    artist: videoItem.snippet.channelTitle,
+                    thumbnail: videoItem.snippet.thumbnails.medium.url,
+                    // Ensure the ID structure is consistent across all songs
+                    id: { videoId: videoItem.id }
+                  }));
 
-                  setCurrentPlaylist(results);
-                  const clickedIndex = results.findIndex(s => s.id === video.id);
-                  // 3. Set the current song index
-                  setCurrentSongIndex(clickedIndex !== -1 ? clickedIndex : 0);
+                  // 2. Find the specific song that was clicked from our new playlist
+                  const clickedSongObject = normalizedPlaylist.find(song => song.id.videoId === video.id);
+
+                  // 3. Set the state using our perfectly structured data
+                  if (clickedSongObject) {
+                    setCurrentSong(clickedSongObject);
+                    setCurrentPlaylist(normalizedPlaylist);
+
+                    const clickedIndex = normalizedPlaylist.findIndex(song => song.id.videoId === video.id);
+                    setCurrentSongIndex(clickedIndex);
+
+                    setIsPlaying(true);
+                    setSelectedIndex(null); // Prevent conflict with Search
+                  }
                 }}
               />
             ))}
