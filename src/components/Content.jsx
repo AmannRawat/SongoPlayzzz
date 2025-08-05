@@ -9,13 +9,19 @@ import { detectMoodFromText } from "../utils/detectMoodFromText";
 import { searchSongs } from "../api/youtube";
 // import AudioPlayer from "./AudioPlayer";
 
-const Content = ({ section }) => {
+const Content = ({
+  section,
+  setCurrentSong,       // This is a setter from App.jsx
+  setIsPlaying,         // This is a setter from App.jsx
+  setCurrentPlaylist,   // This is a setter from App.jsx
+  setCurrentSongIndex,  // This is a setter from App.jsx
+}) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [trackDuration, setTrackDuration] = useState(0);
-  const [currentSong, setCurrentSong] = useState(null);
+  // const [isPlaying, setIsPlaying] = useState(true);
+  // const [trackDuration, setTrackDuration] = useState(0);
+  // const [currentSong, setCurrentSong] = useState(null); //mo longer here its in App.jsx
   const [playlistSongs, setPlaylistSongs] = useState([]);
   // const [selectedMood, setSelectedMood] = useState("all");
   const [searchQuery, setSearchQuery] = useState('');
@@ -26,16 +32,74 @@ const Content = ({ section }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
+  const localForYouSongs = [
+    {
+      title: "O Maahi",
+      artist: "Arijit Singh",
+      thumbnail: "/assets/Songs Cover/oMaahi.jpeg",
+      url: "/assets/Songs/O Mahi.mp3",
+      source: 'local'
+    },
+    {
+      title: "Diet Mountain Dew",
+      artist: "Lana Del Rey",
+      thumbnail: "/assets/Songs Cover/Mountain.jpeg",
+      url: "/assets/Songs/Diet-Mountain-Dew.mp3",
+      source: 'local'
+    },
+    {
+      title: "Starboy",
+      artist: "The Weeknd, Daft Punk",
+      thumbnail: "/assets/Songs Cover/starboy.jpeg",
+      url: "/assets/Songs/Starboy.mp3",
+      source: 'local'
+    },
+    {
+      title: "Shape of You",
+      artist: "Ed Sheeran",
+      thumbnail: "/assets/Songs Cover/shape.jpeg",
+      url: "/assets/Songs/Shape-Of-You.mp3",
+      source: 'local'
+    },
+    {
+      title: "Teri Deewani",
+      artist: "Kailash Kher, Paresh Kamath",
+      thumbnail: "/assets/Songs Cover/teri deewani.jpeg",
+      url: "/assets/Songs/Teri-Deewani.mp3",
+      source: 'local'
+    },
+    {
+      title: "With You",
+      artist: "AP Dhillon",
+      thumbnail: "/assets/Songs Cover/with uh.jpeg",
+      url: "/assets/Songs/With You.mp3",
+      source: 'local'
+    },
+  ];
+
+  const handlePlayForYouSong = (song) => {
+    setCurrentSong(song);
+    setIsPlaying(true);
+
+    // Set the playlist to the new array of hardcoded songs
+    setCurrentPlaylist(localForYouSongs);
+
+    // Find the index of the clicked song within this new playlist
+    const clickedIndex = localForYouSongs.findIndex(s => s.url === song.url);
+    setCurrentSongIndex(clickedIndex !== -1 ? clickedIndex : 0);
+  };
+
   useEffect(() => {
     const fetchSuggestions = async () => {
-      if (query.trim().length < 2) {
+      if (query.trim().length < 2) { //check if user typed atleast 2 character
         setSuggestions([]);
         return;
       }
 
       try {
         const response = await fetch(
-          `https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=${encodeURIComponent(query)}`
+          `https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=${encodeURIComponent(query)}`  //q=${encodeURIComponent(query)} adds the search input safely
+          //encodeURIComponent() makes sure stuff like spaces & special characters don’t break the URL.
         );
         const data = await response.json();
         setSuggestions(data[1]); // List of suggestions
@@ -45,37 +109,12 @@ const Content = ({ section }) => {
     };
 
     const debounceTimer = setTimeout(fetchSuggestions, 300);
-    return () => clearTimeout(debounceTimer);
+    return () => clearTimeout(debounceTimer); //Timer for search suggestions 
   }, [query]);
-
-
-  // const trendingTopics = [
-  //   "Top Hindi songs",
-  //   "Trending Bollywood",
-  //   "Viral Reels Songs",
-  //   "Latest English hits",
-  //   "Top Punjabi Songs",
-  //   "Billboard Top 100",
-  //   "Lo-fi Chill Hits",
-  //   "Romantic songs 2024",
-  //   "Workout Bangers",
-  //   "Rainy day playlist",
-  //   "Indie Pop",
-  //   "Chill Indie Vibes",
-  //   "Sad English songs",
-  //   "New Rap Songs",
-  //   "EDM Festival Bangers",
-  //   "Soothing Piano",
-  //   "Old School Hip Hop",
-  //   "2024 Pop Songs",
-  //   "Punjabi Romantic Songs",
-  //   "Acoustic Covers"
-  // ];
 
   useEffect(() => {
     if (section === "home") {
       fetchPopularArtistSongs(); // Use our new function
-
       //  Refresh every 5 minutes
       const interval = setInterval(fetchPopularArtistSongs, 300000);
       return () => clearInterval(interval);
@@ -109,8 +148,6 @@ const Content = ({ section }) => {
     rainy: ["rainy", "monsoon", "drizzle", "cloudy", "sad chill"]
   };
 
-
-
   useEffect(() => {
     const storedPlaylist = localStorage.getItem("playlistSongs");
     if (storedPlaylist) {
@@ -122,17 +159,6 @@ const Content = ({ section }) => {
     localStorage.setItem("playlistSongs", JSON.stringify(playlistSongs));
   }, [playlistSongs]);
 
-  // const handleSearch = async () => {
-  //   if (query.trim()) {
-  //     // Adding "official" and "lyrics" to the query for better results
-  //     const enhancedQuery = `${query} official song OR lyrics`;
-  //     const songs = await searchSongs(enhancedQuery);
-  //     const filtered = filterLenient(songs);
-  //     const sorted = sortByViews(filtered); // <-- NEW LINE: Sort by views!
-  //     setSearchResults(sorted); // <-- Now we set "sorted" instead of "filtered"
-  //     setSelectedMood(null);
-  //   }
-  // };
   const handleSearch = async () => {
     if (query.trim()) {
       try {
@@ -160,50 +186,73 @@ const Content = ({ section }) => {
     }
   };
 
- const handleInputChange = async (e) => {
-  const input = e.target.value;
-  setQuery(input);
+  const handleInputChange = async (e) => {
+    const input = e.target.value;
+    setQuery(input);
 
-  if (input.trim().length > 2) {
-    try {
-      const res = await fetch("http://localhost:5000/api/autocomplete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: input })
-      });
-      const data = await res.json();
-      setSuggestions(data.suggestions);
-      setShowSuggestions(true);
-    } catch (error) {
-      console.error("Frontend autocomplete fetch failed:", error);
+    if (input.trim().length > 2) {
+      try {
+        const res = await fetch("http://localhost:5000/api/autocomplete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: input })
+        });
+        const data = await res.json();
+        setSuggestions(data.suggestions);
+        setShowSuggestions(true);
+      } catch (error) {
+        console.error("Frontend autocomplete fetch failed:", error);
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    } else {
       setSuggestions([]);
       setShowSuggestions(false);
     }
-  } else {
-    setSuggestions([]);
-    setShowSuggestions(false);
-  }
-};
+  };
 
   const handlePlayLocalSong = (song) => {
-    setCurrentSong(song);   // Set direct song object
-    setSelectedIndex(null); // No index-based song
+    // Add the 'source' property so App.jsx knows how to handle it
+    setCurrentSong({ ...song, source: 'local' });
     setIsPlaying(true);     // Ensure autoplay
+    // --- IMPORTANT NEW LINES FOR PLAYLIST & INDEX ---
+    // Set the current global playlist to the 'playlistSongs' array (your library)
+    setCurrentPlaylist(playlistSongs);
+    // Find the index of the clicked song within the playlistSongs array
+    // Use a unique property like 'url' for local songs
+    const clickedIndex = playlistSongs.findIndex(s => s.url === song.url);
+    // Set the global current song index in App.jsx
+    setCurrentSongIndex(clickedIndex !== -1 ? clickedIndex : 0);
+    // --- END IMPORTANT NEW LINES ---
   };
 
   const handleSongClick = (video) => {
+    // Standardize the song object structure
     setCurrentSong({
+      source: 'youtube',
       title: video.snippet.title,
       artist: video.snippet.channelTitle,
       thumbnail: video.snippet.thumbnails?.medium?.url,
-      videoId: video.id
+      id: { videoId: video.id }
     });
     setSelectedIndex(null);
     setIsPlaying(true);
+    // --- IMPORTANT NEW LINES FOR PLAYLIST & INDEX ---
+    // Determine which array is the active "playlist" for search results.
+    const activePlaylist = getFilteredResults();
+
+    // Find the index of the clicked song within the active playlist
+    const clickedIndex = activePlaylist.findIndex(s => s.id === video.id);
+
+    // Set the global current playlist and index in App.jsx
+    setCurrentPlaylist(activePlaylist);
+    setCurrentSongIndex(clickedIndex !== -1 ? clickedIndex : 0);
+    // --- END IMPORTANT NEW LINES ---
   };
+
   const handleAddToPlaylist = (song) => {
     const alreadyAdded = playlistSongs.find(
-      (item) => item.videoId === song.videoId
+      (item) => (item.id && item.id.videoId) === (song.id && song.id.videoId)
     );
     if (!alreadyAdded) {
       setPlaylistSongs((prev) => [...prev, song]);
@@ -252,7 +301,7 @@ const Content = ({ section }) => {
   };
 
   const searchAgain = async (artist) => {
-    // Try alternative query if first fails
+    // Try alternative query if first fails (fetchPopularArtistSongs)
     const backupQuery = `${artist} popular songs -cover -live`;
     const songs = await searchSongs(backupQuery);
     return filterStrict(songs);
@@ -317,15 +366,15 @@ const Content = ({ section }) => {
       return (isMusicContent || title.includes("lyric")) && !isBadContent;
     });
   };
-  const isActualSong = (video) => {
-    const title = video.snippet.title.toLowerCase();
-    return (
-      title.includes("official") ||
-      title.includes("lyric") ||
-      (title.includes("song") && !title.includes("cover")) ||
-      video.snippet.channelTitle.includes("VEVO")
-    );
-  };
+  // const isActualSong = (video) => {
+  //   const title = video.snippet.title.toLowerCase();
+  //   return (
+  //     title.includes("official") ||
+  //     title.includes("lyric") ||
+  //     (title.includes("song") && !title.includes("cover")) ||
+  //     video.snippet.channelTitle.includes("VEVO")
+  //   );
+  // };
   const sortByViews = (videos) => {
     return videos.sort((a, b) => {
       // If view count is missing, use "0"
@@ -334,12 +383,11 @@ const Content = ({ section }) => {
       return viewsB - viewsA; // Bigger numbers come first
     });
   };
-  const handleSuggestionClick = (suggestion) => {
-    setQuery(suggestion);
-    setShowSuggestions(false);
-    handleSearch(suggestion); // Trigger search
-  };
-
+  // const handleSuggestionClick = (suggestion) => {
+  //   setQuery(suggestion);
+  //   setShowSuggestions(false);
+  //   handleSearch(suggestion); // Trigger search
+  // };
 
   const selectedVideoId = selectedIndex !== null ? results[selectedIndex]?.id?.videoId : null;
 
@@ -353,7 +401,8 @@ const Content = ({ section }) => {
           </div>
 
           <div className="parent-card">
-            {results.filter(isActualSong).map((video, index) => (
+            {/* {results.filter(isActualSong).map((video, index) => ( */}
+            {results.map((video, index) => (
               <SongCard
                 key={video.id}
                 imgSrc={
@@ -373,14 +422,21 @@ const Content = ({ section }) => {
                 }
                 css="pic1"
                 onPlay={() => {
+                  // Create the song object with the correct structure for App.jsx
                   setCurrentSong({
+                    source: 'youtube',
                     title: video.snippet.title,
                     artist: video.snippet.channelTitle,
                     thumbnail: video.snippet.thumbnails.medium.url,
-                    videoId: video.id
+                    id: { videoId: video.id }
                   });
                   setSelectedIndex(null); //  prevent conflict with Search
                   setIsPlaying(true);
+
+                  setCurrentPlaylist(results);
+                  const clickedIndex = results.findIndex(s => s.id === video.id);
+                  // 3. Set the current song index
+                  setCurrentSongIndex(clickedIndex !== -1 ? clickedIndex : 0);
                 }}
               />
             ))}
@@ -396,11 +452,11 @@ const Content = ({ section }) => {
               title="O Maahi"
               artist="Arijit Singh"
               onPlay={() =>
-                handlePlayLocalSong({
+                handlePlayForYouSong({
                   title: "O Maahi",
                   artist: "Arijit Singh",
                   thumbnail: "/assets/Songs Cover/oMaahi.jpeg",
-                  src: "/assets/Songs/O Mahi.mp3",
+                  url: "/assets/Songs/O Mahi.mp3", // Use 'url' instead of 'src'
                 })
               }
             />
@@ -410,11 +466,11 @@ const Content = ({ section }) => {
               title="Diet Mountain Dew"
               artist="Lana Del Rey"
               onPlay={() =>
-                handlePlayLocalSong({
+                handlePlayForYouSong({
                   title: "Diet Mountain Dew",
                   artist: "Lana Del Rey",
                   thumbnail: "/assets/Songs Cover/Mountain.jpeg",
-                  src: "/assets/Songs/Diet-Mountain-Dew.mp3",
+                  url: "/assets/Songs/Diet-Mountain-Dew.mp3", // Use 'url' instead of 'src'
                 })
               }
             />
@@ -424,11 +480,11 @@ const Content = ({ section }) => {
               title="Starboy"
               artist="The Weeknd, Daft Punk"
               onPlay={() =>
-                handlePlayLocalSong({
+                handlePlayForYouSong({
                   title: "Starboy",
                   artist: "The Weeknd, Daft Punk",
                   thumbnail: "/assets/Songs Cover/starboy.jpeg",
-                  src: "/assets/Songs/Starboy.mp3",
+                  url: "/assets/Songs/Starboy.mp3", // Use 'url' instead of 'src'
                 })
               }
             />
@@ -438,11 +494,11 @@ const Content = ({ section }) => {
               title="Shape of You"
               artist="Ed Sheeran"
               onPlay={() =>
-                handlePlayLocalSong({
+                handlePlayForYouSong({
                   title: "Shape of You",
                   artist: "Ed Sheeran",
                   thumbnail: "/assets/Songs Cover/shape.jpeg",
-                  src: "/assets/Songs/Shape-Of-You.mp3",
+                  url: "/assets/Songs/Shape-Of-You.mp3", // Use 'url' instead of 'src'
                 })
               }
             />
@@ -452,11 +508,11 @@ const Content = ({ section }) => {
               title="Teri Deewani"
               artist="Kailash Kher, Paresh Kamath"
               onPlay={() =>
-                handlePlayLocalSong({
+                handlePlayForYouSong({
                   title: "Teri Deewani",
                   artist: "Kailash Kher, Paresh Kamath",
                   thumbnail: "/assets/Songs Cover/teri deewani.jpeg",
-                  src: "/assets/Songs/Teri-Deewani.mp3",
+                  url: "/assets/Songs/Teri-Deewani.mp3", // Use 'url' instead of 'src'
                 })
               }
             />
@@ -466,11 +522,11 @@ const Content = ({ section }) => {
               title="With You"
               artist="AP Dhillon"
               onPlay={() =>
-                handlePlayLocalSong({
+                handlePlayForYouSong({
                   title: "With You",
                   artist: "AP Dhillon",
                   thumbnail: "/assets/Songs Cover/with uh.jpeg",
-                  src: "/assets/Songs/With You.mp3",
+                  url: "/assets/Songs/With You.mp3", // Use 'url' instead of 'src'
                 })
               }
             />
@@ -578,8 +634,9 @@ const Content = ({ section }) => {
                     handleAddToPlaylist({
                       title: video.snippet.title,
                       artist: video.snippet.channelTitle,
-                      thumbnail: video.snippet.thumbnails.medium.url,
-                      videoId: video.id,
+                      thumbnail: video.snippet.thumbnails?.medium?.url,
+                      id: { videoId: video.id },
+                      source: 'youtube'
                     });
                   }}
                 >
@@ -622,8 +679,8 @@ const Content = ({ section }) => {
                             title: song.title,
                             artist: song.artist,
                             thumbnail: song.thumbnail,
-                            // src: song.src || `https://www.youtube.com/watch?v=${song.videoId}`,
-                            videoId: song.videoId
+                            url: song.url, // Pass the url
+                            id: song.id, // Pass youtube id if it exists
                           })
                         }
                       >
@@ -654,7 +711,7 @@ const Content = ({ section }) => {
       }
 
 
-      {
+      {/* {
         (selectedVideoId || currentSong) && (
           <Playbar
             results={selectedIndex !== null ? results : currentSong ? [currentSong] : []}
@@ -670,11 +727,9 @@ const Content = ({ section }) => {
           />
 
         )
-      }
+      } */}
     </div >
   );
 };
 
 export default Content;
-
-
