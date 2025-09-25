@@ -168,7 +168,7 @@ const Content = ({
     if (query.trim()) {
       try {
         // Hit backend
-        const response = await fetch("http://localhost:5000/api/mood/detect", {
+        const response = await fetch("/api/mood/detect", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ text: query })
@@ -198,7 +198,8 @@ const Content = ({
 
     if (input.trim().length > 2) {
       try {
-        const res = await fetch("http://localhost:5000/api/autocomplete", {
+        // const res = await fetch("http://localhost:5000/api/autocomplete", {
+        const res = await fetch("/api/autocomplete", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ query: input })
@@ -414,7 +415,7 @@ const Content = ({
             {/* {results.filter(isActualSong).map((video, index) => ( */}
             {results.map((video, index) => (
               <SongCard
-                key={video.id}
+               key={video.id.videoId}
                 imgSrc={
                   video.snippet.thumbnails?.high?.url ||
                   video.snippet.thumbnails?.medium?.url ||
@@ -644,7 +645,8 @@ const Content = ({
             <div className="search-results">
               {getFilteredResults().map((video, index) => (
                 <div
-                  key={video.id}
+                  // key={video.id}
+                  key={video.id.videoId}
                   className="search-card"
                   onClick={() => handleSongClick(video)} //changed index to video
                 >
