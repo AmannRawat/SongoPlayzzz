@@ -89,28 +89,29 @@ const Content = ({
     setCurrentSongIndex(clickedIndex !== -1 ? clickedIndex : 0);
   };
 
-  useEffect(() => {
-    const fetchSuggestions = async () => {
-      if (query.trim().length < 2) { //check if user typed atleast 2 character
-        setSuggestions([]);
-        return;
-      }
+  //This causing error CORS issue
+  // useEffect(() => {
+  //   const fetchSuggestions = async () => {
+  //     if (query.trim().length < 2) { //check if user typed atleast 2 character
+  //       setSuggestions([]);
+  //       return;
+  //     }
 
-      try {
-        const response = await fetch(
-          `https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=${encodeURIComponent(query)}`  //q=${encodeURIComponent(query)} adds the search input safely
-          //encodeURIComponent() makes sure stuff like spaces & special characters don’t break the URL.
-        );
-        const data = await response.json();
-        setSuggestions(data[1]); // List of suggestions
-      } catch (err) {
-        console.error("Autocomplete fetch failed", err);
-      }
-    };
+  //     try {
+  //       const response = await fetch(
+  //         `https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=${encodeURIComponent(query)}`  //q=${encodeURIComponent(query)} adds the search input safely
+  //         //encodeURIComponent() makes sure stuff like spaces & special characters don’t break the URL.
+  //       );
+  //       const data = await response.json();
+  //       setSuggestions(data[1]); // List of suggestions
+  //     } catch (err) {
+  //       console.error("Autocomplete fetch failed", err);
+  //     }
+  //   };
 
-    const debounceTimer = setTimeout(fetchSuggestions, 300);
-    return () => clearTimeout(debounceTimer); //Timer for search suggestions 
-  }, [query]);
+  //   const debounceTimer = setTimeout(fetchSuggestions, 300);
+  //   return () => clearTimeout(debounceTimer); //Timer for search suggestions 
+  // }, [query]);
 
   useEffect(() => {
     if (section === "home") {
@@ -178,7 +179,8 @@ const Content = ({
         const filtered = filterLenient(songs);
         const sorted = sortByViews(filtered);
 
-        setSearchResults(sorted);
+        // setSearchResults(sorted);
+        setMoodResults(sorted);
         setSelectedMood(mood);
       } catch (err) {
         console.error("Mood detection or search failed:", err);
@@ -210,6 +212,22 @@ const Content = ({
       setShowSuggestions(false);
     }
   };
+
+const handlePlayLibrarySong = (song) => {
+  console.log("Playing from library:", song);
+  // 1. Set the current playlist to your library
+  setCurrentPlaylist(playlistSongs);
+
+  // 2. Find the index of the song you clicked on
+  const clickedIndex = playlistSongs.findIndex(
+    s => (s.id?.videoId || s.url) === (song.id?.videoId || song.url)
+  );
+  setCurrentSongIndex(clickedIndex !== -1 ? clickedIndex : 0);
+
+  // 3. Set the clicked song as the current song and play it
+  setCurrentSong(song);
+  setIsPlaying(true);
+};
 
   const handlePlayLocalSong = (song) => {
     // Add the 'source' property so App.jsx knows how to handle it
@@ -273,16 +291,6 @@ const Content = ({
     }
     return searchResults;
   };
-
-  // const fetchTrendingSongs = async (topic) => {
-  //   try {
-  //     const songs = await searchSongs(topic);
-  //     const cleanResults = filterStrict(songs);
-  //     setResults(cleanResults);
-  //   } catch (error) {
-  //     console.error("Failed to fetch trending songs:", error);
-  //   }
-  // };
 
   const fetchPopularArtistSongs = async () => {
     try {
@@ -366,15 +374,7 @@ const Content = ({
       return (isMusicContent || title.includes("lyric")) && !isBadContent;
     });
   };
-  // const isActualSong = (video) => {
-  //   const title = video.snippet.title.toLowerCase();
-  //   return (
-  //     title.includes("official") ||
-  //     title.includes("lyric") ||
-  //     (title.includes("song") && !title.includes("cover")) ||
-  //     video.snippet.channelTitle.includes("VEVO")
-  //   );
-  // };
+
   const sortByViews = (videos) => {
     return videos.sort((a, b) => {
       // If view count is missing, use "0"
@@ -383,11 +383,6 @@ const Content = ({
       return viewsB - viewsA; // Bigger numbers come first
     });
   };
-  // const handleSuggestionClick = (suggestion) => {
-  //   setQuery(suggestion);
-  //   setShowSuggestions(false);
-  //   handleSearch(suggestion); // Trigger search
-  // };
 
   const selectedVideoId = selectedIndex !== null ? results[selectedIndex]?.id?.videoId : null;
 
@@ -663,14 +658,13 @@ const Content = ({
           <>
             <div className="heading">
               <h1>🎵 Your Library</h1>
-              {/* <h3>Coming Soon</h3> */}
             </div>
             {playlistSongs.length === 0 ? (
               <p>Your playlists is Empty</p>
             ) : (
               <div className="search-results">
-                {playlistSongs.map((song, index) => (
-                  <div key={song.videoId} className="search-card">
+                {playlistSongs.map((song) => (
+                  <div key={song.id?.videoId || song.url} className="search-card">
                     <img
                       src={song.thumbnail}
                       alt="thumbnail"
@@ -683,30 +677,31 @@ const Content = ({
                     <div className="library-actions">
                       <button
                         className="add-btn"
-                        onClick={() =>
-                          handlePlayLocalSong({
-                            title: song.title,
-                            artist: song.artist,
-                            thumbnail: song.thumbnail,
-                            url: song.url, // Pass the url
-                            id: song.id, // Pass youtube id if it exists
-                          })
-                        }
+                        // onClick={() =>
+                        //   handlePlayLocalSong({
+                        //     title: song.title,
+                        //     artist: song.artist,
+                        //     thumbnail: song.thumbnail,
+                        //     url: song.url, // Pass the url
+                        //     id: song.id, // Pass youtube id if it exists
+                        //   })
+                        // }
+                        onClick={() => handlePlayLibrarySong(song)}
                       >
                         ▶ Play
                       </button>
-
                       <button
                         className="remove-btn"
                         onClick={() => {
                           const updatedPlaylist = playlistSongs.filter(
-                            (item) => item.videoId !== song.videoId
+                            (item) => (item.id?.videoId || item.url) !== (song.id?.videoId || song.url)
                           );
                           setPlaylistSongs(updatedPlaylist);
                         }}
                       >
                         ❌ Remove
                       </button>
+
                     </div>
                   </div>
                 ))}

@@ -1,43 +1,27 @@
-.main-layout {
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
-}
 
-.Content {
-    margin-top: 10px;
-    min-height: 100vh;
-    width: 100%;
-    overflow-y: auto;
-    border-radius: 10px;
-    background-color: #1d1d1d;
-}
-
-/* Content */
-.sub-content {
-    /* margin-top: 10px; */
-    margin-left: 10px;
-}
 
 .heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem; /* ADDED: Creates space between the title and the cards below */
 }
 
 .heading h1 {
-    font-size: 1.5rem;
-    font-weight: 800;
+  font-size: 1.5rem;
+  font-weight: 700; /* Adjusted weight for 'Inter' font */
+  color: var(--text-primary);
 }
 
 .heading h3 {
-    margin-right: 20px;
-    margin-top: 5px;
-    font-size: 0.9rem;
-    font-weight: 1000;
-    color: rgb(182, 182, 182);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-secondary); /* CHANGED: Use our theme's secondary text color */
+  cursor: pointer;
+  transition: color 0.2s ease;
 }
 
-
+.heading h3:hover {
+    color: var(--text-primary); /* ADDED: Hover effect */
+    text-decoration: underline;
+}

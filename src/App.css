@@ -1,54 +1,44 @@
 .main-layout {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  height: 100vh;
-  width: 100%;
-  overflow-x: hidden;
+  min-height: 100vh; /* Use min-height to ensure it fills the screen */
 }
 
 .sidebar {
-  width: clamp(180px, 22%, 350px);
-  background-color: #000;
-  flex-shrink: 0;
+  width: clamp(200px, 20%, 300px);
+  background-color: var(--sidebar-background); /* Pure black from Step 1 */
+  padding: 8px; /* Use smaller padding on the container itself */
+  
+  /* --- ADD THESE 3 LINES --- */
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* This creates space BETWEEN the boxes inside */
 }
 
 .Content {
   flex: 1;
-  min-height: 100vh;
   overflow-y: auto;
-  background-color: #1d1d1d;
-  border-radius: 10px;
-  margin-top: 10px;
-  padding: 10px;
+  background-color: var(--background-highlight); /* CHANGED: Using our variable */
+  /* ADDED: Add some spacing around the content pane */
+  margin: 8px;
+  border-radius: 8px;
+  padding: 16px 24px; /* More horizontal padding */
 }
 
-/* .Content {
-  flex: 1;
-  overflow-y: auto;
-  background-color: #1d1d1d;
-  border-radius: 10px;
-  margin-top: 10px;
-  height: 97.1vh;
-  width: 99%;
-} */
-
-/* 📱 Responsive Fixes for Mobile */
+/* Responsive styles - no changes needed here yet */
 @media (max-width: 768px) {
   .main-layout {
-    flex-direction: column; /* Sidebar on top, content below */
+    flex-direction: column;
     height: auto;
   }
-
   .sidebar {
     width: 100%;
     height: auto;
+    padding: 16px; /* Adjust padding for mobile */
   }
-
   .Content {
-    width: 100%;
+    width: auto; /* Let flexbox handle it */
     height: auto;
-    margin-top: 0;
+    margin: 0;
     border-radius: 0;
   }
 }

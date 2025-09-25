@@ -1,196 +1,131 @@
-/* .sidebar{
-  width: 25%;
-  height: 98.3vh;
-} */
+/* Sidebar.css (Final Version) */
 
-/* Mobile: Stack sidebar vertically */
-/* @media (max-width: 768px) {
-  .sidebar {
-    width: 100%;
-    height: auto;
-    order: 1; /* push it below main content */
-
-.logo-box {
-  background-color: #101010;
-  margin: 10px;
-  padding: 20px;
-  height: 20vh;
+/* General style for the two main containers inside the sidebar */
+.logo-box, .library {
+  background-color: var(--background-highlight);
+  padding: 1.5rem; /* Increased padding slightly */
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  border-radius: 10px;
-}
-
-.logo {
-  margin-left: -6px;
-  margin-top: -5px;
-  display: flex;
-  align-items: center;
-  gap: 0.5vw;
-}
-
-.logo img {
-  width: 20%;
-  border-radius: 50px;
-}
-
-.logo span {
-  font-size: 2rem;
-  color: white;
-  font-weight: 900;
-}
-
-
-/* Mobile: Make text and icons bigger */
-@media (max-width: 768px) {
-  .logo span {
-    font-size: 1.5rem;
-  }
-}
-
-.HS {
-  display: flex;
-  align-items: center;
-  gap: 0px;
-  justify-content: space-between;
-  cursor: pointer;
-}
-
-/* Flex wrap on small screens */
-@media (max-width: 768px) {
-  .HS {
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-}
-
-.home, .search {
-  display: flex;
-  align-items: center;
-  gap: 1.2vw;
-}
-
-.home img, .search img {
-  width: 18%;
-}
-
-.home span, .search span {
-  font-size: 1rem;
-  color: white;
-  font-weight: 900;
-  margin-top: 2px;
+  gap: 1.5rem;
 }
 
 .library {
-  background-color: #101010;
-  margin: 10px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  gap: 20px;
-  border-radius: 10px;
-  height: 35.8vw;
+  flex: 1; 
+  padding-top: 1rem; /* Adjust library padding */
 }
 
-/* Mobile: auto height */
-@media (max-width: 768px) {
-  .library {
-    height: auto;
-  }
+/* --- NEW ICON STYLES START HERE --- */
+
+/* Style for all navigation icons */
+.home img, .search img, .playlist img {
+  width: 1.75rem;
+  height: 1.75rem;
+  /* This CSS filter will re-color your black SVGs to our theme's secondary text color */
+  filter: brightness(0) saturate(100%) invert(80%) sepia(6%) saturate(103%) hue-rotate(193deg) brightness(88%) contrast(85%);
+  transition: filter 0.2s ease;
 }
 
-.playlist {
+/* When hovering over the link, make the icon white */
+.home:hover img, .search:hover img {
+  /* This filter turns the icon white */
+  filter: brightness(0) saturate(100%) invert(100%) sepia(100%) saturate(0%) hue-rotate(253deg) brightness(103%) contrast(101%);
+}
+
+/* --- END OF NEW ICON STYLES --- */
+
+
+/* Logo and navigation links styling */
+.logo {
   display: flex;
   align-items: center;
-  gap: 1.1vw;
+  gap: 0.75rem;
 }
 
-.playlist img {
-  width: 9%;
+.logo img {
+  width: 2.5rem;
+  border-radius: 50%;
 }
 
-.playlist span {
-  font-size: 1rem;
-  color: white;
-  font-weight: 900;
+.logo span {
+  font-size: 1.5rem;
+  font-weight: 700;
 }
 
+.home, .search, .playlist {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-weight: 700;
+  transition: color 0.2s ease;
+}
+
+.home:hover, .search:hover {
+  color: var(--text-primary);
+}
+
+/* Styling for the smaller boxes inside the library */
 .boxes {
-  background-color: #1f1f1f;
-  border-radius: 10px;
-  padding: 15px;
+  background-color: #242424;
+  border-radius: 8px;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 0.5rem;
 }
 
 .boxes h3 {
-  font-size: 1.2rem;
-  font-weight: 900;
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 .boxes h4 {
-  font-size: .7rem;
-  font-weight: 500;
-  width: 17vw;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  line-height: 1.4;
 }
 
-/* Text wrap fix for mobile */
-@media (max-width: 768px) {
-  .boxes h4 {
-    width: 100%;
-    font-size: 0.75rem;
-  }
-}
-
+/* Button styling */
 .btn1 {
-  color: black;
+  background-color: var(--text-primary);
+  color: #000;
   font-weight: 700;
-  margin-top: 8px;
-  margin-left: -2px;
-  padding: .51vw 1.2vw;
+  padding: 0.6rem 1rem;
   border-radius: 20px;
-  font-size: .9rem;
+  font-size: 0.8rem;
   border: none;
   cursor: pointer;
-  background-color: rgb(255, 255, 255);
-}
-
-.btn1:hover {
-  padding: .58vw 1.3vw;
+  align-self: flex-start;
+  transition: transform 0.2s ease;
 }
 
 .btn1 a {
   text-decoration: none;
-  color: black;
-  font-weight: 700;
+  color: #000;
 }
 
+.btn1:hover {
+  transform: scale(1.05);
+}
+
+/* Footer styling */
 .lib-footer {
-  font-size: .68rem;
-  position: absolute;
-  bottom: 5px;
-  display: grid;
-  grid-template-columns: 115px 120px;
-  grid-template-rows: 25px 25px 20px;
-  text-align: center;
-}
-
-/* Stack footer links on small screen */
-@media (max-width: 768px) {
-  .lib-footer {
-    position: static;
-    grid-template-columns: 1fr 1fr;
-    font-size: 0.75rem;
-    margin-top: 20px;
-  }
+  margin-top: auto;
+  padding-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
 }
 
 .lib-footer a {
   text-decoration: none;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
 }
 
-.lib-footer span {
-  color: #b3b3aa;
+.lib-footer a:hover {
+  text-decoration: underline;
 }
