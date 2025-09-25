@@ -1,44 +1,37 @@
 .main-layout {
   display: flex;
-  min-height: 100vh; /* Use min-height to ensure it fills the screen */
+  height: 100vh; /* CHANGED: From min-height to a fixed height */
+  overflow: hidden; /* ADDED: Prevents any overflow from the container */
 }
 
 .sidebar {
   width: clamp(200px, 20%, 300px);
-  background-color: var(--sidebar-background); /* Pure black from Step 1 */
-  padding: 8px; /* Use smaller padding on the container itself */
-  
-  /* --- ADD THESE 3 LINES --- */
+  background-color: var(--sidebar-background);
+  padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 8px; /* This creates space BETWEEN the boxes inside */
+  gap: 8px;
 }
 
 .Content {
   flex: 1;
   overflow-y: auto;
-  background-color: var(--background-highlight); /* CHANGED: Using our variable */
-  /* ADDED: Add some spacing around the content pane */
+  background-color: var(--background-highlight);
   margin: 8px;
   border-radius: 8px;
-  padding: 16px 24px; /* More horizontal padding */
+  padding: 16px 24px;
 }
 
-/* Responsive styles - no changes needed here yet */
 @media (max-width: 768px) {
-  .main-layout {
-    flex-direction: column;
-    height: auto;
-  }
   .sidebar {
-    width: 100%;
-    height: auto;
-    padding: 16px; /* Adjust padding for mobile */
+    display: none;
   }
+  
   .Content {
-    width: auto; /* Let flexbox handle it */
+    width: 100%;
     height: auto;
     margin: 0;
     border-radius: 0;
+    padding-bottom: 70px; 
   }
 }

@@ -1,9 +1,9 @@
 /* Sidebar.css (Final Version) */
 
-/* General style for the two main containers inside the sidebar */
+/* General style for the two main containers */
 .logo-box, .library {
   background-color: var(--background-highlight);
-  padding: 1.5rem; /* Increased padding slightly */
+  padding: 1.5rem;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -12,61 +12,58 @@
 
 .library {
   flex: 1; 
-  padding-top: 1rem; /* Adjust library padding */
+  padding-top: 1rem;
 }
 
-/* --- NEW ICON STYLES START HERE --- */
-
-/* Style for all navigation icons */
+/* Icon Styles */
 .home img, .search img, .playlist img {
   width: 1.75rem;
   height: 1.75rem;
-  /* This CSS filter will re-color your black SVGs to our theme's secondary text color */
   filter: brightness(0) saturate(100%) invert(80%) sepia(6%) saturate(103%) hue-rotate(193deg) brightness(88%) contrast(85%);
   transition: filter 0.2s ease;
 }
 
-/* When hovering over the link, make the icon white */
-.home:hover img, .search:hover img {
-  /* This filter turns the icon white */
+
+.home:hover img, .search:hover img, .playlist:hover img {
   filter: brightness(0) saturate(100%) invert(100%) sepia(100%) saturate(0%) hue-rotate(253deg) brightness(103%) contrast(101%);
 }
 
-/* --- END OF NEW ICON STYLES --- */
-
-
 /* Logo and navigation links styling */
-.logo {
+.logo, .home, .search, .playlist {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
+}
+.HS {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* This adds space between Home and Search */
 }
 
 .logo img {
   width: 2.5rem;
+  height: 2.5rem;
+  object-fit: cover;
   border-radius: 50%;
 }
-
 .logo span {
-  font-size: 1.5rem;
+  font-size: 1.7rem;
   font-weight: 700;
 }
 
 .home, .search, .playlist {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
   cursor: pointer;
   color: var(--text-secondary);
   font-weight: 700;
   transition: color 0.2s ease;
 }
 
-.home:hover, .search:hover {
+.home:hover, .search:hover, .playlist:hover {
   color: var(--text-primary);
 }
 
-/* Styling for the smaller boxes inside the library */
+
+
 .boxes {
   background-color: #242424;
   border-radius: 8px;
@@ -74,11 +71,18 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  transition: background-color 0.3s ease; /* ADDED */
+  cursor: pointer; /* ADDED */
+}
+
+.boxes:hover {
+  background-color: #2a2a2a; /* ADDED: Hover effect */
 }
 
 .boxes h3 {
   font-size: 1rem;
   font-weight: 700;
+  color: var(--text-primary); /* Use theme color */
 }
 
 .boxes h4 {
@@ -88,28 +92,14 @@
   line-height: 1.4;
 }
 
-/* Button styling */
-.btn1 {
-  background-color: var(--text-primary);
-  color: #000;
-  font-weight: 700;
-  padding: 0.6rem 1rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  border: none;
-  cursor: pointer;
-  align-self: flex-start;
-  transition: transform 0.2s ease;
-}
-
-.btn1 a {
+/* This is a wrapper for the clickable box link */
+.box-link {
   text-decoration: none;
-  color: #000;
 }
 
-.btn1:hover {
-  transform: scale(1.05);
-}
+
+/* --- DELETED: The old .btn1 rules have been removed --- */
+
 
 /* Footer styling */
 .lib-footer {
@@ -119,13 +109,11 @@
   flex-wrap: wrap;
   gap: 0.5rem 1rem;
 }
-
 .lib-footer a {
   text-decoration: none;
   font-size: 0.7rem;
   color: var(--text-secondary);
 }
-
 .lib-footer a:hover {
   text-decoration: underline;
 }

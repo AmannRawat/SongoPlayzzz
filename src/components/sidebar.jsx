@@ -21,34 +21,33 @@ function Sidebar({ onSectionChange }) {
         </div>
       </div>
 
-      <div className="library" onClick={() => onSectionChange("library")}>
-        <div className="playlist">
+      <div className="library">
+        <div className="playlist" onClick={() => onSectionChange("library")}>
           <img src="/assets/playlist.svg" alt="Library" />
           <span>Your Library</span>
         </div>
-        <div className="boxes">
+        
+        {/* --- CARD #1: MADE THE WHOLE DIV CLICKABLE --- */}
+        <div className="boxes" onClick={() => onSectionChange("library")}>
           <h3>My Playlist</h3>
           <h4>Here Check your personalised playlist</h4>
-          <div><button className="btn1" onClick={() => onSectionChange("playlist")}>
-            Your Mixes!
-          </button>
-          </div>
+          {/* The <button> has been removed */}
         </div>
-         <div className="boxes">
-          <h3>SongoPlayz Playlist</h3>
-          <h4>Some Indie Songs only for you</h4>
-          <div>
-            <button className="btn1">
-              <a href="https://songoplayz.netlify.app/" target="_blank" rel="noreferrer">Check Now</a>
-            </button>
+        
+        {/* --- CARD #2: WRAPPED THE WHOLE DIV IN AN <a> TAG --- */}
+        <a href="https://songoplayz.netlify.app/" target="_blank" rel="noreferrer" className="box-link">
+          <div className="boxes">
+            <h3>Old Version</h3>
+            <h4>This is Older version of SongoPlayzz</h4>
+            {/* The <button> has been removed */}
           </div>
-        </div>
+        </a>
         <div className="lib-footer">
           <div><a href="/"><span>Legal</span></a></div>
           <div><a href="/"><span>Privacy Policy</span></a></div>
           <div><a href="/"><span>Cookies</span></a></div>
           <div><a href="/"><span>About Ads</span></a></div>
-          <span>© 2025</span>
+          {/* <span>© 2025</span> */}
         </div>
       </div>
     </div>

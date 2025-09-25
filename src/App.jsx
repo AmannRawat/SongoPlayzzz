@@ -1,24 +1,23 @@
 import React, { useState ,useEffect, useRef } from "react";
 import './App.css';
-import Navbar from './components/Navbar';
+// import Navbar from './components/Navbar';
 import Sidebar from './components/sidebar';
 import Content from './components/Content';
 import Playbar from './components/Playbar';
+import BottomNav from './components/BottomNav'; 
 
 function App() {
   const [currentSection, setCurrentSection] = useState("home");
-  // START: Music Playback State and Ref (NEW/UNCOMMENTED)
+  // START: Music Playback State and Ref 
   const [currentSong, setCurrentSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.5); // Initial volume
-
   const [currentPlaylist, setCurrentPlaylist] = useState([]); // Array of song objects
   const [currentSongIndex, setCurrentSongIndex] = useState(0); // Index of current song in playlist
   // END: Music Playback State and Ref
 
-  // START: Music Playback Functions (NEW/UNCOMMENTED)
   // Function to toggle play/pause
   const togglePlayPause = () => {
     setIsPlaying(!isPlaying);
@@ -85,6 +84,7 @@ function App() {
           />
         )}
       </div>
+        <BottomNav onSectionChange={setCurrentSection} />
     </div>
   );
 

@@ -1,0 +1,45 @@
+/* BottomNav.css (Updated) */
+
+/* Mobile First: The bar is visible by default */
+.bottom-nav {
+  display: flex; /* CHANGED */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background-color: var(--background-highlight);
+  border-top: 1px solid #282828;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 1000;
+}
+
+/* ADDED: This new rule hides the bar on screens WIDER than 768px */
+@media (min-width: 769px) {
+  .bottom-nav {
+    display: none;
+  }
+}
+
+/* The rest of the styles remain the same */
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.7rem;
+  transition: color 0.2s ease;
+}
+
+.nav-item:hover {
+  color: var(--text-primary);
+}
+
+.nav-icon {
+  font-size: 1.5rem;
+}

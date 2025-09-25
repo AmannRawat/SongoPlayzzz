@@ -1,4 +1,3 @@
-// moodRoute.js (Final Corrected Code)
 import express from "express";
 import axios from "axios";
 

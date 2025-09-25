@@ -38,7 +38,8 @@
   border-radius: 8px;
   font-size: 1rem;
   border: none;
-  background-color: #101010;
+  /* background-color: #101010; */
+  background-color: #2a2a2a;
   color: white;
 }
 
@@ -88,46 +89,37 @@
   background-color: #d91c6f;
 }
 
-/* Mood section */
-.mood-section {
-  margin: 2rem 0 1rem;
-  text-align: center;
+.mood-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem; /* Add some space above the grid */
 }
 
-.mood-heading {
-  font-size: 1.6rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-  color: #ffffff;
-}
-
-.mood-toggle-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.75rem;
-  padding: 0 1rem;
-}
-
-.mood-toggle {
-  padding: 0.6rem 1.2rem;
-  border: none;
-  border-radius: 999px;
-  font-size: 0.95rem;
-  cursor: pointer;
-  background: linear-gradient(to right, #33003f, #f1217f);
+.mood-card {
+  aspect-ratio: 1/1;
+  border-radius: 8px;
+  padding: 1rem;
   color: white;
-  transition: all 0.2s ease-in-out;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+   background: linear-gradient(135deg, var(--card-bg) 0%, #181818 100%);
 }
 
-.mood-toggle:hover {
-  transform: scale(1.05);
-  background: linear-gradient(to right, #440054, #fb2d8a);
+.mood-card:hover {
+  transform: scale(1.04);
 }
 
-.mood-toggle.active {
-  background: linear-gradient(to right, #440054, #fb2d8a);
+.mood-card span {
+  font-size: 1.5rem;
+  font-weight: 700;
+  /* position: absolute; */
+  bottom: 0.5rem;
+  right: -0.5rem;
+  transform: rotate(-25deg) translate(0%, -10%);
+  transform-origin: bottom right;
 }
 
 .mood-result-heading {
@@ -193,7 +185,7 @@
 
 /* Add to playlist button */
 .add-btn {
-  background-color: #1ed760;
+  background-color: var(--primary-accent);
   border: none;
   padding: 8px 16px;
   border-radius: 20px;

@@ -9,6 +9,10 @@ import { detectMoodFromText } from "../utils/detectMoodFromText";
 import { searchSongs } from "../api/youtube";
 // import AudioPlayer from "./AudioPlayer";
 
+const moodColors = [
+  "#8D4B55", "#A85863", "#C46572", "#E07281", "#2E5A88", "#3A73AD",
+  "#468CD2", "#52A5F7", "#5D4A88", "#755DB0", "#8D70D8", "#A583FF"
+];
 const Content = ({
   section,
   setCurrentSong,       // This is a setter from App.jsx
@@ -213,21 +217,21 @@ const Content = ({
     }
   };
 
-const handlePlayLibrarySong = (song) => {
-  console.log("Playing from library:", song);
-  // 1. Set the current playlist to your library
-  setCurrentPlaylist(playlistSongs);
+  const handlePlayLibrarySong = (song) => {
+    console.log("Playing from library:", song);
+    // 1. Set the current playlist to your library
+    setCurrentPlaylist(playlistSongs);
 
-  // 2. Find the index of the song you clicked on
-  const clickedIndex = playlistSongs.findIndex(
-    s => (s.id?.videoId || s.url) === (song.id?.videoId || song.url)
-  );
-  setCurrentSongIndex(clickedIndex !== -1 ? clickedIndex : 0);
+    // 2. Find the index of the song you clicked on
+    const clickedIndex = playlistSongs.findIndex(
+      s => (s.id?.videoId || s.url) === (song.id?.videoId || song.url)
+    );
+    setCurrentSongIndex(clickedIndex !== -1 ? clickedIndex : 0);
 
-  // 3. Set the clicked song as the current song and play it
-  setCurrentSong(song);
-  setIsPlaying(true);
-};
+    // 3. Set the clicked song as the current song and play it
+    setCurrentSong(song);
+    setIsPlaying(true);
+  };
 
   const handlePlayLocalSong = (song) => {
     // Add the 'source' property so App.jsx knows how to handle it
@@ -255,7 +259,6 @@ const handlePlayLibrarySong = (song) => {
     });
     setSelectedIndex(null);
     setIsPlaying(true);
-    // --- IMPORTANT NEW LINES FOR PLAYLIST & INDEX ---
     // Determine which array is the active "playlist" for search results.
     const activePlaylist = getFilteredResults();
 
@@ -265,7 +268,6 @@ const handlePlayLibrarySong = (song) => {
     // Set the global current playlist and index in App.jsx
     setCurrentPlaylist(activePlaylist);
     setCurrentSongIndex(clickedIndex !== -1 ? clickedIndex : 0);
-    // --- END IMPORTANT NEW LINES ---
   };
 
   const handleAddToPlaylist = (song) => {
@@ -277,20 +279,33 @@ const handlePlayLibrarySong = (song) => {
     }
   };
 
-
+  const handleMoodClick = async (mood) => {
+    const songs = await searchSongs(mood + " songs");
+    setSelectedMood(mood);
+    setMoodResults(songs);
+    setQuery("");
+    setSearchResults([]);
+  };
   const getFilteredResults = () => {
-    if (selectedMood) {
-      const moodWords = moodKeywords[selectedMood];
-      return moodResults.filter((video) => {
-        const title = video?.snippet?.title?.toLowerCase?.() || "";
-        const channel = video?.snippet?.channelTitle?.toLowerCase?.() || "";
-        return moodWords?.some(
-          (keyword) => title.includes(keyword) || channel.includes(keyword)
-        );
-      });
-    }
+    // This logic is simplified to just return one set of results
+    if (selectedMood) return moodResults;
     return searchResults;
   };
+
+  const hasResults = getFilteredResults().length > 0;
+  // const getFilteredResults = () => {
+  //   if (selectedMood) {
+  //     const moodWords = moodKeywords[selectedMood];
+  //     return moodResults.filter((video) => {
+  //       const title = video?.snippet?.title?.toLowerCase?.() || "";
+  //       const channel = video?.snippet?.channelTitle?.toLowerCase?.() || "";
+  //       return moodWords?.some(
+  //         (keyword) => title.includes(keyword) || channel.includes(keyword)
+  //       );
+  //     });
+  //   }
+  //   return searchResults;
+  // };
 
   const fetchPopularArtistSongs = async () => {
     try {
@@ -553,7 +568,16 @@ const handlePlayLibrarySong = (song) => {
 
       {section === "search" && (
         <>
-          <div className="mood-section">
+          {/* This heading changes based on the view */}
+          <div className="heading">
+            <h1>{hasResults ? "Search Results" : "Browse All"}</h1>
+            {/* ADDED: A "Back" button to return to the grid */}
+            {hasResults && (
+              <h3 onClick={() => setMoodResults([])}>Back to Browse</h3>
+            )}
+          </div>
+
+          {/* <div className="mood-section">
             <h2 className="mood-heading">Choose Your Mood</h2>
             <div className="mood-toggle-container">
               {Object.keys(moodKeywords).map((mood) => (
@@ -573,7 +597,7 @@ const handlePlayLibrarySong = (song) => {
                 </button>
               ))}
             </div>
-          </div>
+          </div> */}
           <div className="heading">
             <h1>🔍 Search Music</h1>
             <h3>Find your favorite tracks</h3>
@@ -613,45 +637,63 @@ const handlePlayLibrarySong = (song) => {
             <h3 className="mood-result-heading">🎶 Showing results for: "{selectedMood.charAt(0).toUpperCase() + selectedMood.slice(1)}"</h3>
           )}
 
-          <div className="search-results">
-            {getFilteredResults().map((video, index) => (
-              <div
-                key={video.id}
-                className="search-card"
-                onClick={() => handleSongClick(video)} //changed index to video
-              >
-                <img
-                  src={video.snippet.thumbnails.medium.url}
-                  alt="thumbnail"
-                  className="search-thumbnail"
-                />
 
-                <div className="search-details">
-                  <h4 className="search-title">{video.snippet.title}</h4>
-                  <p className="search-channel">{video.snippet.channelTitle}</p>
-                </div>
-
-                <button
-                  className="add-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddToPlaylist({
-                      title: video.snippet.title,
-                      artist: video.snippet.channelTitle,
-                      thumbnail: video.snippet.thumbnails?.medium?.url,
-                      id: { videoId: video.id },
-                      source: 'youtube'
-                    });
-                  }}
+          {/* If there are results, it shows your existing results list.
+              If not, it shows the new mood grid. */}
+          {hasResults ? (
+            <div className="search-results">
+              {getFilteredResults().map((video, index) => (
+                <div
+                  key={video.id}
+                  className="search-card"
+                  onClick={() => handleSongClick(video)} //changed index to video
                 >
-                  ➕ Add
-                </button>
-              </div>
-            ))}
-          </div>
+                  <img
+                    src={video.snippet.thumbnails.medium.url}
+                    alt="thumbnail"
+                    className="search-thumbnail"
+                  />
+
+                  <div className="search-details">
+                    <h4 className="search-title">{video.snippet.title}</h4>
+                    <p className="search-channel">{video.snippet.channelTitle}</p>
+                  </div>
+
+                  <button
+                    className="add-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddToPlaylist({
+                        title: video.snippet.title,
+                        artist: video.snippet.channelTitle,
+                        thumbnail: video.snippet.thumbnails?.medium?.url,
+                        id: { videoId: video.id },
+                        source: 'youtube'
+                      });
+                    }}
+                  >
+                    ➕ Add
+                  </button>
+                </div>
+              ))}
+            </div>
+        
+      ) : (
+        <div className="mood-grid-container">
+              {Object.keys(moodKeywords).map((mood, index) => (
+                <div
+                  key={mood}
+                  className="mood-card"
+                  style={{ '--card-bg': moodColors[index % moodColors.length] }}
+                  onClick={() => handleMoodClick(mood)}
+                >
+                  <span>{mood.charAt(0).toUpperCase() + mood.slice(1)}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </>
-      )
-      }
+      )}
 
       {
         section === "library" && (
