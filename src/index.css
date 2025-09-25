@@ -1,85 +1,41 @@
+/* Define our new design system: colors and fonts */
 :root {
-    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-    line-height: 1.5;
-    font-weight: 400;
+  /* NEW: Color Palette */
+  --background-base: #121212;      /* Dark charcoal for the page background */
+  --background-highlight: #181818; /* Lighter gray for content panes */
+  --sidebar-background: #000000;    /* Pure black for the sidebar */
+  --text-primary: #FFFFFF;          /* Pure white for main text */
+  --text-secondary: #B3B3B3;        /* Light gray for subtext */
 
-    color-scheme: light dark;
-    color: rgba(255, 255, 255, 0.87);
-    background-color: #242424;
-
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  /* NEW: Font */
+  --font-family-base: 'Inter', sans-serif;
 }
 
-/* index.css */
+/* Global reset and styles */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Roboto", sans-serif;
-  font-weight: 400;
-  font-style: normal;
-  color: white;
 }
 
 body {
-  background-color: black;
+  background-color: var(--background-base); /* CHANGED */
+  font-family: var(--font-family-base);     /* CHANGED */
+  color: var(--text-primary);               /* CHANGED */
   overflow-x: hidden;
 }
 
-
-h1, h2 {
-  font-size: clamp(1.2rem, 5vw, 2rem);
-}
-.search-title {
-  font-size: clamp(0.9rem, 1.8vw, 1.2rem);
-}
-/* Style the scrollbar container */
+/* Style the scrollbar to match the new theme */
 ::-webkit-scrollbar {
-    width: 9px;
+  width: 9px;
 }
-
-/* Style the scrollbar track (background) */
 ::-webkit-scrollbar-track {
-    background: transparent;
+  background: transparent;
 }
-
-/* Style the scrollbar thumb (draggable part) */
 ::-webkit-scrollbar-thumb {
-    background: #454545;
-    border-radius: 20px;
+  background: #454545;
+  border-radius: 20px;
 }
-
-/* Style the scrollbar thumb when hovered */
 ::-webkit-scrollbar-thumb:hover {
-    background: #ababab;
-    cursor: grabbing;
-}
-
-/* Making Responsive */
-html {
-  font-size: 100%;
-}
-
-@media (max-width: 1024px) {
-  html {
-    font-size: 95%;
-  }
-}
-
-@media (max-width: 768px) {
-  html {
-    font-size: 90%;
-  }
-}
-
-@media (max-width: 480px) {
-  html {
-    font-size: 85%;
-  }
-  body {
-     overflow-x: hidden;
-  }
+  background: #777777; /* Made hover slightly lighter */
 }

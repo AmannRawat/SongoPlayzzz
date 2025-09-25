@@ -1,279 +1,308 @@
 import React, { useEffect, useRef, useState } from "react";
 import YouTube from "react-youtube";
 import "./Playbar.css";
-// import { ReactComponent as PauseIcon } from '/assets/pause.svg';
 
+// This is now a "controlled component". It receives all its data and functions as props from App.jsx.
 const Playbar = ({
-  results,
-  selectedIndex,
-  setSelectedIndex,
   currentSong,
-  setCurrentSong,
-  handleNextLocalSong,
   isPlaying,
+  duration,
+  progress,
+  volume,
+  setDuration,
+  setProgress,
   setIsPlaying,
-  trackDuration,
-  setTrackDuration,
-  onPlayToggle,
+  togglePlayPause,
+  onPlayNext,
+  onPlayPrev,
+  handleProgressBarChange,
+  setVolume,
 }) => {
   const audioRef = useRef(null);
-  const playerRef = useRef(null);
-  const intervalRef = useRef(null);
-  const [progress, setProgress] = useState(0);
-  const [volume, setVolume] = useState(50);
-  const [isDragging, setIsDragging] = React.useState(false);
+  const playerRef = useRef(null); // For YouTube player
+  const [isMuted, setIsMuted] = useState(false);
   const seekbarRef = useRef(null);
-  const [isMuted, setIsMuted] = React.useState(false);
+  const isSeeking = useRef(false);
 
-
+  if (!currentSong) {
+    return null; // Don't render anything if there's no song
+  }
+  // A single, robust useEffect to handle all playback logic for local and YouTube
   useEffect(() => {
-    console.log("🎧 currentSong: ", currentSong);
-  }, [currentSong]);
+    const isYoutube = currentSong?.source === 'youtube';
+    const isLocal = currentSong?.source === 'local';
 
-  const currentVideo = selectedIndex !== null ? results[selectedIndex] : null;
-  // const isLocal = !!currentSong;
-  // const isLocal = currentSong?.src?.startsWith("http") && currentSong?.src?.endsWith(".mp3");
-  const isLocal = currentSong?.src?.endsWith(".mp3");
-  // const isLocal = currentSong?.type === "local";
-
- const videoId = currentVideo?.id || currentSong?.videoId || null;
-
-  const opts = {
-    height: "0",
-    width: "0",
-    playerVars: { autoplay: 1, controls: 0, modestbranding: 1 },
-  };
-
-  const onReady = (event) => {
-    playerRef.current = event.target;
-    event.target.setVolume(volume);
-    event.target.playVideo();
-  };
-
-  const onStateChange = (event) => {
-    const state = event.data;
-    if (state === window.YT?.PlayerState.PLAYING) {
-      setIsPlaying(true);
-      const dur = playerRef.current?.getDuration();
-      if (dur && dur !== trackDuration) {
-        setTrackDuration(dur);
+    // --- Logic for LOCAL songs ---
+    if (isLocal && audioRef.current) {
+      if (audioRef.current.src !== currentSong.url) {
+        audioRef.current.src = currentSong.url;
       }
-    } else if (
-      state === window.YT?.PlayerState.PAUSED ||
-      state === window.YT?.PlayerState.ENDED
-    ) {
+      if (isPlaying) {
+        audioRef.current.play().catch(e => console.error("Audio play error:", e));
+      } else {
+        audioRef.current.pause();
+      }
+    }
+
+    // --- Logic for YOUTUBE songs ---
+    // (1) ADDED A GUARD CLAUSE here to match the JSX
+    if (isYoutube && playerRef.current && currentSong.id?.videoId) {
+      if (isPlaying) {
+        playerRef.current.playVideo();
+      } else {
+        playerRef.current.pauseVideo();
+      }
+    }
+
+    // (2) ADDED A CLEANUP FUNCTION to prevent race conditions
+    // This function runs BEFORE the effect runs again, or when the component unmounts.
+    return () => {
+      if (isLocal && audioRef.current) {
+        audioRef.current.pause(); // Pause the local player when switching
+      }
+      if (isYoutube && playerRef.current) {
+        playerRef.current.pauseVideo(); // Pause the YouTube player when switching
+      }
+    };
+  }, [currentSong, isPlaying]); // The dependencies are what trigger this effect to run.
+
+  // Effect to handle volume
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+    if (playerRef.current) {
+      playerRef.current.setVolume(volume * 100);
+    }
+  }, [volume]);
+
+  // Effect to handle seeking from parent
+  useEffect(() => {
+    if (isSeeking.current) return; // Don't seek if the user is dragging
+
+    const isYoutube = currentSong?.source === 'youtube';
+    const isLocal = currentSong?.source === 'local';
+
+    if (isYoutube && playerRef.current) {
+      const ytCurrentTime = playerRef.current.getCurrentTime();
+      if (Math.abs(ytCurrentTime - progress) > 1.5) {
+        playerRef.current.seekTo(progress, true);
+      }
+    }
+    if (isLocal && audioRef.current) {
+      const diff = Math.abs(audioRef.current.currentTime - progress);
+      if (diff > 1) {
+        audioRef.current.currentTime = progress;
+      }
+    }
+  }, [progress]);
+
+  // YouTube Player options
+  const youtubeOpts = {
+    height: '0',
+    width: '0',
+    playerVars: {
+      autoplay: 1,
+      controls: 0,
+    },
+  };
+
+  // YouTube event handlers
+  const onYoutubeReady = (event) => {
+    playerRef.current = event.target;
+    setDuration(playerRef.current.getDuration());
+  };
+
+  const onYoutubeStateChange = (event) => {
+    if (event.data === 1) { // Playing
+      setIsPlaying(true);
+      setDuration(playerRef.current.getDuration());
+    } else if (event.data === 2) { // Paused
       setIsPlaying(false);
-    }
-
-    // Auto play next on END
-    if (state === window.YT?.PlayerState.ENDED) {
-      playNext();
+    } else if (event.data === 0) { // Ended
+      onPlayNext();
     }
   };
 
-  const togglePlay = () => {
-    if (isLocal) {
-      if (!audioRef.current) return;
-      isPlaying ? audioRef.current.pause() : audioRef.current.play();
-    } else {
-      if (!playerRef.current) return;
-      isPlaying ? playerRef.current.pauseVideo() : playerRef.current.playVideo();
-    }
-    onPlayToggle?.();
+  // Effect to handle YouTube progress updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Only update if a YouTube song is playing and the user is not dragging
+      if (isPlaying && currentSong?.source === 'youtube' && playerRef.current && !isSeeking.current) {
+        setProgress(playerRef.current.getCurrentTime());
+      }
+    }, 500); // Update every half second
+
+    // Clear the interval when the component unmounts or dependencies change
+    return () => clearInterval(interval);
+  }, [isPlaying, currentSong, setProgress]);
+
+  // Helper to format time
+  const formatTime = (timeInSeconds) => {
+    if (isNaN(timeInSeconds) || timeInSeconds === 0) return "0:00";
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = Math.floor(timeInSeconds % 60);
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
-  const handleMouseDown = () => {
-    setIsDragging(true);
-  };
+  // Effect to handle seekbar dragging logic
+  useEffect(() => {
+    const seekbar = seekbarRef.current;
+    if (!seekbar) return;
 
-  const handleSeek = (e) => {
-    const rect = seekbarRef.current.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const width = rect.width;
-    const seekTime = (clickX / width) * trackDuration;
+    const calculateNewProgress = (e) => {
+      if (duration > 0) {
+        const rect = seekbar.getBoundingClientRect();
+        const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+        const clickX = clientX - rect.left;
+        const width = rect.width;
+        const newProgress = (clickX / width) * duration;
+        return Math.max(0, Math.min(newProgress, duration));
+      }
+      return null;
+    };
 
-    if (isLocal) {
-      audioRef.current.currentTime = seekTime;
-    } else {
-      playerRef.current?.seekTo(seekTime, true);
-    }
+    const handleDown = (e) => {
+      isSeeking.current = true;
+      const newProgress = calculateNewProgress(e);
+      if (newProgress !== null) {
+        setProgress(newProgress);
+      }
 
-    setProgress((clickX / width) * 100);
-  };
+      const handleMove = (moveEvent) => {
+        if (isSeeking.current) {
+          const movedProgress = calculateNewProgress(moveEvent);
+          if (movedProgress !== null) {
+            setProgress(movedProgress);
+          }
+        }
+      };
 
+      const handleUp = (upEvent) => {
+        if (isSeeking.current) {
+          const finalProgress = calculateNewProgress(upEvent);
+          if (finalProgress !== null) {
+            const isYoutube = currentSong?.source === 'youtube';
+            const isLocal = currentSong?.source === 'local';
 
-  const handleMouseUp = () => {
-    if (isDragging) {
-      setIsDragging(false);
-    }
-  };
+            // This is the core fix: tell the media player to seek to the new position.
+            if (isYoutube && playerRef.current) {
+              playerRef.current.seekTo(finalProgress, true);
+            }
+            if (isLocal && audioRef.current) {
+              audioRef.current.currentTime = finalProgress;
+            }
+            // Update the state to the final position.
+            setProgress(finalProgress);
+          }
+          isSeeking.current = false;
+        }
+        document.removeEventListener('mousemove', handleMove);
+        document.removeEventListener('mouseup', handleUp);
+        document.removeEventListener('touchmove', handleMove);
+        document.removeEventListener('touchend', handleUp);
+      };
 
-  const handleMouseMove = (e) => {
-    if (!isDragging) return;
-    const rect = seekbarRef.current.getBoundingClientRect();
-    const moveX = e.clientX - rect.left;
-    const width = rect.width;
-    const seekTime = Math.max(0, Math.min(moveX / width, 1)) * trackDuration;
-    playerRef.current?.seekTo(seekTime, true);
-    setProgress((moveX / width) * 100);
+      document.addEventListener('mousemove', handleMove);
+      document.addEventListener('mouseup', handleUp);
+      document.addEventListener('touchmove', handleMove);
+      document.addEventListener('touchend', handleUp);
+    };
+
+    seekbar.addEventListener('mousedown', handleDown);
+    seekbar.addEventListener('touchstart', handleDown);
+
+    return () => {
+      seekbar.removeEventListener('mousedown', handleDown);
+      seekbar.removeEventListener('touchstart', handleDown);
+    };
+  }, [duration, handleProgressBarChange, setProgress]);
+
+  const handleVolumeChange = (e) => {
+    const newVolume = parseFloat(e.target.value);
+    setIsMuted(newVolume === 0);
+    setVolume(newVolume);
   };
 
   const toggleMute = () => {
-    if (isLocal) {
-      if (!audioRef.current) return;
-      audioRef.current.muted = !audioRef.current.muted;
-    } else {
-      if (!playerRef.current) return;
-      isMuted ? playerRef.current.unMute() : playerRef.current.mute();
-    }
-    setIsMuted(!isMuted);
+    const newMutedState = !isMuted;
+    setIsMuted(newMutedState);
+    setVolume(newMutedState ? 0 : 0.5);
   };
 
-  const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      const current = audioRef.current.currentTime;
-      const total = audioRef.current.duration;
-      if (total) {
-        setProgress((current / total) * 100);
-      }
-    }
-  };
-
-  const handleLoadedMetadata = () => {
-    if (audioRef.current) {
-      setTrackDuration(audioRef.current.duration);
-    }
-  };
-
-  const handleVolume = (e) => {
-    const newVol = parseInt(e.target.value);
-    setVolume(newVol);
-    e.target.style.setProperty('--val', newVol);
-
-    if (isLocal) {
-      if (audioRef.current) audioRef.current.volume = newVol / 100;
-    } else {
-      playerRef.current?.setVolume(newVol);
-    }
-  };
-
-
-  const playNext = () => {
-    if (selectedIndex + 1 < results.length) {
-      setSelectedIndex(selectedIndex + 1);
-    }
-  };
-
-  const playPrevious = () => {
-    if (selectedIndex > 0) {
-      setSelectedIndex(selectedIndex - 1);
-    }
-  };
-
-  useEffect(() => {
-    if (playerRef.current && videoId) {
-      playerRef.current.loadVideoById(videoId);
-    }
-  }, [videoId]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (isLocal && audioRef.current && isPlaying) {
-        const current = audioRef.current.currentTime;
-        const total = audioRef.current.duration;
-        if (total) setProgress((current / total) * 100);
-      } else if (playerRef.current && isPlaying) {
-        const current = playerRef.current.getCurrentTime();
-        const total = playerRef.current.getDuration();
-        if (total) setProgress((current / total) * 100);
-      }
-    }, 1000);
-
-    intervalRef.current = interval;
-    return () => clearInterval(interval);
-  }, [isPlaying, isLocal]);
-
-  if (!currentVideo && !currentSong) return null;
 
   return (
     <div className="playbar">
-      {isLocal ? (
+      {currentSong?.source === 'local' && (
         <audio
           ref={audioRef}
-          // src={localSong.src}
-          src={currentSong?.src || `https://www.youtube.com/watch?v=${currentSong?.videoId}`} // or your existing logic
-          autoPlay
-          onTimeUpdate={handleTimeUpdate}
-          onLoadedMetadata={handleLoadedMetadata}
-          onEnded={handleNextLocalSong}
+          src={currentSong.url}
+          // onLoadedMetadata={() => setDuration(audioRef.current.duration)}
+          onLoadedMetadata={() => {
+            setDuration(audioRef.current.duration);
+            // audioRef.current.play().catch(e => console.error("Audio play error:", e));
+          }}
+          onTimeUpdate={() => {
+            if (!isSeeking.current) { // Only update progress if user is not seeking
+              setProgress(audioRef.current.currentTime);
+            }
+          }}
+          onEnded={onPlayNext}
+          onError={(e) => console.error("Audio Error:", e)}
+        // autoPlay={isPlaying}
         />
-      ) : (
+      )}
+      {currentSong?.source === 'youtube' && currentSong.id?.videoId && (
         <YouTube
-          videoId={videoId}
-          opts={opts}
-          onReady={onReady}
-          onStateChange={onStateChange}
+          videoId={currentSong.id.videoId}
+          opts={youtubeOpts}
+          onReady={onYoutubeReady}
+          onStateChange={onYoutubeStateChange}
+          onError={(e) => console.error("YouTube Error:", e)}
+          className="youtube-player"
         />
       )}
 
       <div className="track-info">
-        <img
-          src={
-            isLocal
-              ? currentSong.thumbnail
-              : `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`
-          }
-          alt="Thumbnail"
-        />
+        <img src={currentSong.thumbnail} alt="Thumbnail" />
         <div>
-          <p className="track-title">
-            {isLocal
-              ? currentSong?.title
-              : currentVideo?.snippet?.title || currentSong?.title || "Unknown Title"}
-          </p>
-
-          <p className="track-channel">
-            {isLocal
-              ? currentSong?.artist
-              : currentVideo?.snippet?.channelTitle || currentSong?.artist || "Unknown Artist"}
-          </p>
+          <p className="track-title">{currentSong.title || "Unknown Title"}</p>
+          <p className="track-channel">{currentSong.artist || "Unknown Artist"}</p>
         </div>
       </div>
 
       <div className="controls-and-seek">
         <div className="controls">
-          <img src="/assets/previos.svg" alt="Previous" onClick={playPrevious} />
+          <img src="/assets/previos.svg" alt="Previous" onClick={onPlayPrev} />
           <img
             src={isPlaying ? "/assets/pause.svg" : "/assets/play.svg"}
             alt="Play/Pause"
-            onClick={togglePlay}
+            onClick={togglePlayPause}
           />
-          <img src="/assets/next.svg" alt="Next" onClick={playNext} />
+          <img src="/assets/next.svg" alt="Next" onClick={onPlayNext} />
         </div>
-
-        <div
-          className="seekbar"
-          ref={seekbarRef}
-          onClick={handleSeek}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-        >
-          <div className="slider" style={{ width: `${progress}%` }}></div>
+        <div className="seek-container">
+          <span className="time-label">{formatTime(progress)}</span>
+          <div className="seekbar" ref={seekbarRef}>
+            <div
+              className="slider"
+              style={{ width: `${(progress / duration) * 100 || 0}%` }}
+            ></div>
+          </div>
+          <span className="time-label">{formatTime(duration)}</span>
         </div>
-
       </div>
-
 
       <div className="volume-control">
         <span className="volume-label">Volume :</span>
         <input
           type="range"
           min="0"
-          max="100"
+          max="1"
+          step="0.01"
           value={volume}
-          onChange={handleVolume}
+          onChange={handleVolumeChange}
+          style={{ '--val': volume * 100 }}
         />
         <img
           src={isMuted ? "/assets/mute.svg" : "/assets/volume.svg"}
@@ -282,7 +311,6 @@ const Playbar = ({
           style={{ width: "24px", height: "24px", cursor: "pointer" }}
         />
       </div>
-
     </div>
   );
 };

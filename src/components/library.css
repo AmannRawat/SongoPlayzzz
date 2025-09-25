@@ -1,9 +1,35 @@
-.remove-btn {
-  /* margin-left: 10px; */
-  margin-top: 8px;
-  background-color: #bf3030;
-  color: black;
+.library-actions {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+  align-items: center; /* This vertically aligns the buttons */
+}
+
+/* --- UPDATED "Play/Add" Button --- */
+/* This is now a clean white button with black text */
+.add-btn {
+  background-color: var(--text-primary); /* White background */
+  color: #000; /* Black text */
   border: none;
+  
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: transform 0.2s ease;
+}
+
+.add-btn:hover {
+  transform: scale(1.05); /* Subtle scale effect on hover */
+}
+
+/* --- UPDATED "Remove" Button --- */
+/* Dark gray by default, turning red on hover */
+.remove-btn {
+  background-color: #2a2a2a; /* Dark gray background */
+  color: var(--text-primary); /* White text */
+  border: none;
+  
   padding: 6px 10px;
   border-radius: 20px;
   cursor: pointer;
@@ -12,27 +38,5 @@
 }
 
 .remove-btn:hover {
-  background-color: #d83838;
-}
-
-.library-actions {
-  display: flex;
-  gap: 10px;
-  margin-left: auto;
-}
-
-.add-btn {
-  margin-top: 8px;
-  background-color: #1ed760;
-  color: black;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.2s ease;
-}
-
-.add-btn:hover {
-  background-color: #1db954;
+  background-color: #e63946; /* A refined red for the hover state */
 }

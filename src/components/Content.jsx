@@ -9,13 +9,23 @@ import { detectMoodFromText } from "../utils/detectMoodFromText";
 import { searchSongs } from "../api/youtube";
 // import AudioPlayer from "./AudioPlayer";
 
-const Content = ({ section }) => {
+const moodColors = [
+  "#8D4B55", "#A85863", "#C46572", "#E07281", "#2E5A88", "#3A73AD",
+  "#468CD2", "#52A5F7", "#5D4A88", "#755DB0", "#8D70D8", "#A583FF"
+];
+const Content = ({
+  section,
+  setCurrentSong,       // This is a setter from App.jsx
+  setIsPlaying,         // This is a setter from App.jsx
+  setCurrentPlaylist,   // This is a setter from App.jsx
+  setCurrentSongIndex,  // This is a setter from App.jsx
+}) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [trackDuration, setTrackDuration] = useState(0);
-  const [currentSong, setCurrentSong] = useState(null);
+  // const [isPlaying, setIsPlaying] = useState(true);
+  // const [trackDuration, setTrackDuration] = useState(0);
+  // const [currentSong, setCurrentSong] = useState(null); //mo longer here its in App.jsx
   const [playlistSongs, setPlaylistSongs] = useState([]);
   // const [selectedMood, setSelectedMood] = useState("all");
   const [searchQuery, setSearchQuery] = useState('');
@@ -26,56 +36,90 @@ const Content = ({ section }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  useEffect(() => {
-    const fetchSuggestions = async () => {
-      if (query.trim().length < 2) {
-        setSuggestions([]);
-        return;
-      }
+  const localForYouSongs = [
+    {
+      title: "O Maahi",
+      artist: "Arijit Singh",
+      thumbnail: "/assets/Songs Cover/oMaahi.jpeg",
+      url: "/assets/Songs/O Mahi.mp3",
+      source: 'local'
+    },
+    {
+      title: "Diet Mountain Dew",
+      artist: "Lana Del Rey",
+      thumbnail: "/assets/Songs Cover/Mountain.jpeg",
+      url: "/assets/Songs/Diet-Mountain-Dew.mp3",
+      source: 'local'
+    },
+    {
+      title: "Starboy",
+      artist: "The Weeknd, Daft Punk",
+      thumbnail: "/assets/Songs Cover/starboy.jpeg",
+      url: "/assets/Songs/Starboy.mp3",
+      source: 'local'
+    },
+    {
+      title: "Shape of You",
+      artist: "Ed Sheeran",
+      thumbnail: "/assets/Songs Cover/shape.jpeg",
+      url: "/assets/Songs/Shape-Of-You.mp3",
+      source: 'local'
+    },
+    {
+      title: "Teri Deewani",
+      artist: "Kailash Kher, Paresh Kamath",
+      thumbnail: "/assets/Songs Cover/teri deewani.jpeg",
+      url: "/assets/Songs/Teri-Deewani.mp3",
+      source: 'local'
+    },
+    {
+      title: "With You",
+      artist: "AP Dhillon",
+      thumbnail: "/assets/Songs Cover/with uh.jpeg",
+      url: "/assets/Songs/With You.mp3",
+      source: 'local'
+    },
+  ];
 
-      try {
-        const response = await fetch(
-          `https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=${encodeURIComponent(query)}`
-        );
-        const data = await response.json();
-        setSuggestions(data[1]); // List of suggestions
-      } catch (err) {
-        console.error("Autocomplete fetch failed", err);
-      }
-    };
+  const handlePlayForYouSong = (song) => {   //Function For For You section of home page
+    setCurrentSong({ ...song, source: 'local' });
+    setIsPlaying(true);
 
-    const debounceTimer = setTimeout(fetchSuggestions, 300);
-    return () => clearTimeout(debounceTimer);
-  }, [query]);
+    // Set the playlist to the new array of hardcoded songs
+    setCurrentPlaylist(localForYouSongs);
 
+    // Find the index of the clicked song within this new playlist
+    const clickedIndex = localForYouSongs.findIndex(s => s.url === song.url);
+    setCurrentSongIndex(clickedIndex !== -1 ? clickedIndex : 0);
+  };
 
-  // const trendingTopics = [
-  //   "Top Hindi songs",
-  //   "Trending Bollywood",
-  //   "Viral Reels Songs",
-  //   "Latest English hits",
-  //   "Top Punjabi Songs",
-  //   "Billboard Top 100",
-  //   "Lo-fi Chill Hits",
-  //   "Romantic songs 2024",
-  //   "Workout Bangers",
-  //   "Rainy day playlist",
-  //   "Indie Pop",
-  //   "Chill Indie Vibes",
-  //   "Sad English songs",
-  //   "New Rap Songs",
-  //   "EDM Festival Bangers",
-  //   "Soothing Piano",
-  //   "Old School Hip Hop",
-  //   "2024 Pop Songs",
-  //   "Punjabi Romantic Songs",
-  //   "Acoustic Covers"
-  // ];
+  //This causing error CORS issue
+  // useEffect(() => {
+  //   const fetchSuggestions = async () => {
+  //     if (query.trim().length < 2) { //check if user typed atleast 2 character
+  //       setSuggestions([]);
+  //       return;
+  //     }
+
+  //     try {
+  //       const response = await fetch(
+  //         `https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=${encodeURIComponent(query)}`  //q=${encodeURIComponent(query)} adds the search input safely
+  //         //encodeURIComponent() makes sure stuff like spaces & special characters don’t break the URL.
+  //       );
+  //       const data = await response.json();
+  //       setSuggestions(data[1]); // List of suggestions
+  //     } catch (err) {
+  //       console.error("Autocomplete fetch failed", err);
+  //     }
+  //   };
+
+  //   const debounceTimer = setTimeout(fetchSuggestions, 300);
+  //   return () => clearTimeout(debounceTimer); //Timer for search suggestions 
+  // }, [query]);
 
   useEffect(() => {
     if (section === "home") {
       fetchPopularArtistSongs(); // Use our new function
-
       //  Refresh every 5 minutes
       const interval = setInterval(fetchPopularArtistSongs, 300000);
       return () => clearInterval(interval);
@@ -109,8 +153,6 @@ const Content = ({ section }) => {
     rainy: ["rainy", "monsoon", "drizzle", "cloudy", "sad chill"]
   };
 
-
-
   useEffect(() => {
     const storedPlaylist = localStorage.getItem("playlistSongs");
     if (storedPlaylist) {
@@ -122,17 +164,6 @@ const Content = ({ section }) => {
     localStorage.setItem("playlistSongs", JSON.stringify(playlistSongs));
   }, [playlistSongs]);
 
-  // const handleSearch = async () => {
-  //   if (query.trim()) {
-  //     // Adding "official" and "lyrics" to the query for better results
-  //     const enhancedQuery = `${query} official song OR lyrics`;
-  //     const songs = await searchSongs(enhancedQuery);
-  //     const filtered = filterLenient(songs);
-  //     const sorted = sortByViews(filtered); // <-- NEW LINE: Sort by views!
-  //     setSearchResults(sorted); // <-- Now we set "sorted" instead of "filtered"
-  //     setSelectedMood(null);
-  //   }
-  // };
   const handleSearch = async () => {
     if (query.trim()) {
       try {
@@ -152,7 +183,8 @@ const Content = ({ section }) => {
         const filtered = filterLenient(songs);
         const sorted = sortByViews(filtered);
 
-        setSearchResults(sorted);
+        // setSearchResults(sorted);
+        setMoodResults(sorted);
         setSelectedMood(mood);
       } catch (err) {
         console.error("Mood detection or search failed:", err);
@@ -160,79 +192,119 @@ const Content = ({ section }) => {
     }
   };
 
- const handleInputChange = async (e) => {
-  const input = e.target.value;
-  setQuery(input);
+  const handleInputChange = async (e) => {
+    const input = e.target.value;
+    setQuery(input);
 
-  if (input.trim().length > 2) {
-    try {
-      const res = await fetch("http://localhost:5000/api/autocomplete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: input })
-      });
-      const data = await res.json();
-      setSuggestions(data.suggestions);
-      setShowSuggestions(true);
-    } catch (error) {
-      console.error("Frontend autocomplete fetch failed:", error);
+    if (input.trim().length > 2) {
+      try {
+        const res = await fetch("http://localhost:5000/api/autocomplete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: input })
+        });
+        const data = await res.json();
+        setSuggestions(data.suggestions);
+        setShowSuggestions(true);
+      } catch (error) {
+        console.error("Frontend autocomplete fetch failed:", error);
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    } else {
       setSuggestions([]);
       setShowSuggestions(false);
     }
-  } else {
-    setSuggestions([]);
-    setShowSuggestions(false);
-  }
-};
+  };
+
+  const handlePlayLibrarySong = (song) => {
+    console.log("Playing from library:", song);
+    // 1. Set the current playlist to your library
+    setCurrentPlaylist(playlistSongs);
+
+    // 2. Find the index of the song you clicked on
+    const clickedIndex = playlistSongs.findIndex(
+      s => (s.id?.videoId || s.url) === (song.id?.videoId || song.url)
+    );
+    setCurrentSongIndex(clickedIndex !== -1 ? clickedIndex : 0);
+
+    // 3. Set the clicked song as the current song and play it
+    setCurrentSong(song);
+    setIsPlaying(true);
+  };
 
   const handlePlayLocalSong = (song) => {
-    setCurrentSong(song);   // Set direct song object
-    setSelectedIndex(null); // No index-based song
+    // Add the 'source' property so App.jsx knows how to handle it
+    setCurrentSong({ ...song, source: 'local' });
     setIsPlaying(true);     // Ensure autoplay
+    // --- IMPORTANT NEW LINES FOR PLAYLIST & INDEX ---
+    // Set the current global playlist to the 'playlistSongs' array (your library)
+    setCurrentPlaylist(playlistSongs);
+    // Find the index of the clicked song within the playlistSongs array
+    // Use a unique property like 'url' for local songs
+    const clickedIndex = playlistSongs.findIndex(s => s.url === song.url);
+    // Set the global current song index in App.jsx
+    setCurrentSongIndex(clickedIndex !== -1 ? clickedIndex : 0);
+    // --- END IMPORTANT NEW LINES ---
   };
 
   const handleSongClick = (video) => {
+    // Standardize the song object structure
     setCurrentSong({
+      source: 'youtube',
       title: video.snippet.title,
       artist: video.snippet.channelTitle,
       thumbnail: video.snippet.thumbnails?.medium?.url,
-      videoId: video.id
+      id: { videoId: video.id }
     });
     setSelectedIndex(null);
     setIsPlaying(true);
+    // Determine which array is the active "playlist" for search results.
+    const activePlaylist = getFilteredResults();
+
+    // Find the index of the clicked song within the active playlist
+    const clickedIndex = activePlaylist.findIndex(s => s.id === video.id);
+
+    // Set the global current playlist and index in App.jsx
+    setCurrentPlaylist(activePlaylist);
+    setCurrentSongIndex(clickedIndex !== -1 ? clickedIndex : 0);
   };
+
   const handleAddToPlaylist = (song) => {
     const alreadyAdded = playlistSongs.find(
-      (item) => item.videoId === song.videoId
+      (item) => (item.id && item.id.videoId) === (song.id && song.id.videoId)
     );
     if (!alreadyAdded) {
       setPlaylistSongs((prev) => [...prev, song]);
     }
   };
 
-
+  const handleMoodClick = async (mood) => {
+    const songs = await searchSongs(mood + " songs");
+    setSelectedMood(mood);
+    setMoodResults(songs);
+    setQuery("");
+    setSearchResults([]);
+  };
   const getFilteredResults = () => {
-    if (selectedMood) {
-      const moodWords = moodKeywords[selectedMood];
-      return moodResults.filter((video) => {
-        const title = video?.snippet?.title?.toLowerCase?.() || "";
-        const channel = video?.snippet?.channelTitle?.toLowerCase?.() || "";
-        return moodWords?.some(
-          (keyword) => title.includes(keyword) || channel.includes(keyword)
-        );
-      });
-    }
+    // This logic is simplified to just return one set of results
+    if (selectedMood) return moodResults;
     return searchResults;
   };
 
-  // const fetchTrendingSongs = async (topic) => {
-  //   try {
-  //     const songs = await searchSongs(topic);
-  //     const cleanResults = filterStrict(songs);
-  //     setResults(cleanResults);
-  //   } catch (error) {
-  //     console.error("Failed to fetch trending songs:", error);
+  const hasResults = getFilteredResults().length > 0;
+  // const getFilteredResults = () => {
+  //   if (selectedMood) {
+  //     const moodWords = moodKeywords[selectedMood];
+  //     return moodResults.filter((video) => {
+  //       const title = video?.snippet?.title?.toLowerCase?.() || "";
+  //       const channel = video?.snippet?.channelTitle?.toLowerCase?.() || "";
+  //       return moodWords?.some(
+  //         (keyword) => title.includes(keyword) || channel.includes(keyword)
+  //       );
+  //     });
   //   }
+  //   return searchResults;
   // };
 
   const fetchPopularArtistSongs = async () => {
@@ -252,7 +324,7 @@ const Content = ({ section }) => {
   };
 
   const searchAgain = async (artist) => {
-    // Try alternative query if first fails
+    // Try alternative query if first fails (fetchPopularArtistSongs)
     const backupQuery = `${artist} popular songs -cover -live`;
     const songs = await searchSongs(backupQuery);
     return filterStrict(songs);
@@ -317,15 +389,7 @@ const Content = ({ section }) => {
       return (isMusicContent || title.includes("lyric")) && !isBadContent;
     });
   };
-  const isActualSong = (video) => {
-    const title = video.snippet.title.toLowerCase();
-    return (
-      title.includes("official") ||
-      title.includes("lyric") ||
-      (title.includes("song") && !title.includes("cover")) ||
-      video.snippet.channelTitle.includes("VEVO")
-    );
-  };
+
   const sortByViews = (videos) => {
     return videos.sort((a, b) => {
       // If view count is missing, use "0"
@@ -334,12 +398,6 @@ const Content = ({ section }) => {
       return viewsB - viewsA; // Bigger numbers come first
     });
   };
-  const handleSuggestionClick = (suggestion) => {
-    setQuery(suggestion);
-    setShowSuggestions(false);
-    handleSearch(suggestion); // Trigger search
-  };
-
 
   const selectedVideoId = selectedIndex !== null ? results[selectedIndex]?.id?.videoId : null;
 
@@ -353,7 +411,8 @@ const Content = ({ section }) => {
           </div>
 
           <div className="parent-card">
-            {results.filter(isActualSong).map((video, index) => (
+            {/* {results.filter(isActualSong).map((video, index) => ( */}
+            {results.map((video, index) => (
               <SongCard
                 key={video.id}
                 imgSrc={
@@ -373,14 +432,30 @@ const Content = ({ section }) => {
                 }
                 css="pic1"
                 onPlay={() => {
-                  setCurrentSong({
-                    title: video.snippet.title,
-                    artist: video.snippet.channelTitle,
-                    thumbnail: video.snippet.thumbnails.medium.url,
-                    videoId: video.id
-                  });
-                  setSelectedIndex(null); //  prevent conflict with Search
-                  setIsPlaying(true);
+                  // 1. Create a new playlist where every song has our standard structure
+                  const normalizedPlaylist = results.map(videoItem => ({
+                    source: 'youtube',
+                    title: videoItem.snippet.title,
+                    artist: videoItem.snippet.channelTitle,
+                    thumbnail: videoItem.snippet.thumbnails.medium.url,
+                    // Ensure the ID structure is consistent across all songs
+                    id: { videoId: videoItem.id }
+                  }));
+
+                  // 2. Find the specific song that was clicked from our new playlist
+                  const clickedSongObject = normalizedPlaylist.find(song => song.id.videoId === video.id);
+
+                  // 3. Set the state using our perfectly structured data
+                  if (clickedSongObject) {
+                    setCurrentSong(clickedSongObject);
+                    setCurrentPlaylist(normalizedPlaylist);
+
+                    const clickedIndex = normalizedPlaylist.findIndex(song => song.id.videoId === video.id);
+                    setCurrentSongIndex(clickedIndex);
+
+                    setIsPlaying(true);
+                    setSelectedIndex(null); // Prevent conflict with Search
+                  }
                 }}
               />
             ))}
@@ -396,11 +471,11 @@ const Content = ({ section }) => {
               title="O Maahi"
               artist="Arijit Singh"
               onPlay={() =>
-                handlePlayLocalSong({
+                handlePlayForYouSong({
                   title: "O Maahi",
                   artist: "Arijit Singh",
                   thumbnail: "/assets/Songs Cover/oMaahi.jpeg",
-                  src: "/assets/Songs/O Mahi.mp3",
+                  url: "/assets/Songs/O Mahi.mp3", // Use 'url' instead of 'src'
                 })
               }
             />
@@ -410,11 +485,11 @@ const Content = ({ section }) => {
               title="Diet Mountain Dew"
               artist="Lana Del Rey"
               onPlay={() =>
-                handlePlayLocalSong({
+                handlePlayForYouSong({
                   title: "Diet Mountain Dew",
                   artist: "Lana Del Rey",
                   thumbnail: "/assets/Songs Cover/Mountain.jpeg",
-                  src: "/assets/Songs/Diet-Mountain-Dew.mp3",
+                  url: "/assets/Songs/Diet-Mountain-Dew.mp3", // Use 'url' instead of 'src'
                 })
               }
             />
@@ -424,11 +499,11 @@ const Content = ({ section }) => {
               title="Starboy"
               artist="The Weeknd, Daft Punk"
               onPlay={() =>
-                handlePlayLocalSong({
+                handlePlayForYouSong({
                   title: "Starboy",
                   artist: "The Weeknd, Daft Punk",
                   thumbnail: "/assets/Songs Cover/starboy.jpeg",
-                  src: "/assets/Songs/Starboy.mp3",
+                  url: "/assets/Songs/Starboy.mp3", // Use 'url' instead of 'src'
                 })
               }
             />
@@ -438,11 +513,11 @@ const Content = ({ section }) => {
               title="Shape of You"
               artist="Ed Sheeran"
               onPlay={() =>
-                handlePlayLocalSong({
+                handlePlayForYouSong({
                   title: "Shape of You",
                   artist: "Ed Sheeran",
                   thumbnail: "/assets/Songs Cover/shape.jpeg",
-                  src: "/assets/Songs/Shape-Of-You.mp3",
+                  url: "/assets/Songs/Shape-Of-You.mp3", // Use 'url' instead of 'src'
                 })
               }
             />
@@ -452,11 +527,11 @@ const Content = ({ section }) => {
               title="Teri Deewani"
               artist="Kailash Kher, Paresh Kamath"
               onPlay={() =>
-                handlePlayLocalSong({
+                handlePlayForYouSong({
                   title: "Teri Deewani",
                   artist: "Kailash Kher, Paresh Kamath",
                   thumbnail: "/assets/Songs Cover/teri deewani.jpeg",
-                  src: "/assets/Songs/Teri-Deewani.mp3",
+                  url: "/assets/Songs/Teri-Deewani.mp3", // Use 'url' instead of 'src'
                 })
               }
             />
@@ -466,11 +541,11 @@ const Content = ({ section }) => {
               title="With You"
               artist="AP Dhillon"
               onPlay={() =>
-                handlePlayLocalSong({
+                handlePlayForYouSong({
                   title: "With You",
                   artist: "AP Dhillon",
                   thumbnail: "/assets/Songs Cover/with uh.jpeg",
-                  src: "/assets/Songs/With You.mp3",
+                  url: "/assets/Songs/With You.mp3", // Use 'url' instead of 'src'
                 })
               }
             />
@@ -493,7 +568,16 @@ const Content = ({ section }) => {
 
       {section === "search" && (
         <>
-          <div className="mood-section">
+          {/* This heading changes based on the view */}
+          <div className="heading">
+            <h1>{hasResults ? "Search Results" : "Browse All"}</h1>
+            {/* ADDED: A "Back" button to return to the grid */}
+            {hasResults && (
+              <h3 onClick={() => setMoodResults([])}>Back to Browse</h3>
+            )}
+          </div>
+
+          {/* <div className="mood-section">
             <h2 className="mood-heading">Choose Your Mood</h2>
             <div className="mood-toggle-container">
               {Object.keys(moodKeywords).map((mood) => (
@@ -513,7 +597,7 @@ const Content = ({ section }) => {
                 </button>
               ))}
             </div>
-          </div>
+          </div> */}
           <div className="heading">
             <h1>🔍 Search Music</h1>
             <h3>Find your favorite tracks</h3>
@@ -553,58 +637,76 @@ const Content = ({ section }) => {
             <h3 className="mood-result-heading">🎶 Showing results for: "{selectedMood.charAt(0).toUpperCase() + selectedMood.slice(1)}"</h3>
           )}
 
-          <div className="search-results">
-            {getFilteredResults().map((video, index) => (
-              <div
-                key={video.id}
-                className="search-card"
-                onClick={() => handleSongClick(video)} //changed index to video
-              >
-                <img
-                  src={video.snippet.thumbnails.medium.url}
-                  alt="thumbnail"
-                  className="search-thumbnail"
-                />
 
-                <div className="search-details">
-                  <h4 className="search-title">{video.snippet.title}</h4>
-                  <p className="search-channel">{video.snippet.channelTitle}</p>
-                </div>
-
-                <button
-                  className="add-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddToPlaylist({
-                      title: video.snippet.title,
-                      artist: video.snippet.channelTitle,
-                      thumbnail: video.snippet.thumbnails.medium.url,
-                      videoId: video.id,
-                    });
-                  }}
+          {/* If there are results, it shows your existing results list.
+              If not, it shows the new mood grid. */}
+          {hasResults ? (
+            <div className="search-results">
+              {getFilteredResults().map((video, index) => (
+                <div
+                  key={video.id}
+                  className="search-card"
+                  onClick={() => handleSongClick(video)} //changed index to video
                 >
-                  ➕ Add
-                </button>
-              </div>
-            ))}
-          </div>
+                  <img
+                    src={video.snippet.thumbnails.medium.url}
+                    alt="thumbnail"
+                    className="search-thumbnail"
+                  />
+
+                  <div className="search-details">
+                    <h4 className="search-title">{video.snippet.title}</h4>
+                    <p className="search-channel">{video.snippet.channelTitle}</p>
+                  </div>
+
+                  <button
+                    className="add-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddToPlaylist({
+                        title: video.snippet.title,
+                        artist: video.snippet.channelTitle,
+                        thumbnail: video.snippet.thumbnails?.medium?.url,
+                        id: { videoId: video.id },
+                        source: 'youtube'
+                      });
+                    }}
+                  >
+                    ➕ Add
+                  </button>
+                </div>
+              ))}
+            </div>
+        
+      ) : (
+        <div className="mood-grid-container">
+              {Object.keys(moodKeywords).map((mood, index) => (
+                <div
+                  key={mood}
+                  className="mood-card"
+                  style={{ '--card-bg': moodColors[index % moodColors.length] }}
+                  onClick={() => handleMoodClick(mood)}
+                >
+                  <span>{mood.charAt(0).toUpperCase() + mood.slice(1)}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </>
-      )
-      }
+      )}
 
       {
         section === "library" && (
           <>
             <div className="heading">
               <h1>🎵 Your Library</h1>
-              {/* <h3>Coming Soon</h3> */}
             </div>
             {playlistSongs.length === 0 ? (
               <p>Your playlists is Empty</p>
             ) : (
               <div className="search-results">
-                {playlistSongs.map((song, index) => (
-                  <div key={song.videoId} className="search-card">
+                {playlistSongs.map((song) => (
+                  <div key={song.id?.videoId || song.url} className="search-card">
                     <img
                       src={song.thumbnail}
                       alt="thumbnail"
@@ -617,30 +719,31 @@ const Content = ({ section }) => {
                     <div className="library-actions">
                       <button
                         className="add-btn"
-                        onClick={() =>
-                          handlePlayLocalSong({
-                            title: song.title,
-                            artist: song.artist,
-                            thumbnail: song.thumbnail,
-                            // src: song.src || `https://www.youtube.com/watch?v=${song.videoId}`,
-                            videoId: song.videoId
-                          })
-                        }
+                        // onClick={() =>
+                        //   handlePlayLocalSong({
+                        //     title: song.title,
+                        //     artist: song.artist,
+                        //     thumbnail: song.thumbnail,
+                        //     url: song.url, // Pass the url
+                        //     id: song.id, // Pass youtube id if it exists
+                        //   })
+                        // }
+                        onClick={() => handlePlayLibrarySong(song)}
                       >
                         ▶ Play
                       </button>
-
                       <button
                         className="remove-btn"
                         onClick={() => {
                           const updatedPlaylist = playlistSongs.filter(
-                            (item) => item.videoId !== song.videoId
+                            (item) => (item.id?.videoId || item.url) !== (song.id?.videoId || song.url)
                           );
                           setPlaylistSongs(updatedPlaylist);
                         }}
                       >
                         ❌ Remove
                       </button>
+
                     </div>
                   </div>
                 ))}
@@ -654,7 +757,7 @@ const Content = ({ section }) => {
       }
 
 
-      {
+      {/* {
         (selectedVideoId || currentSong) && (
           <Playbar
             results={selectedIndex !== null ? results : currentSong ? [currentSong] : []}
@@ -670,11 +773,9 @@ const Content = ({ section }) => {
           />
 
         )
-      }
+      } */}
     </div >
   );
 };
 
 export default Content;
-
-
