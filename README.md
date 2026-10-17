@@ -2,6 +2,8 @@
 
 🎵 **Discover music that matches your mood.**
 
+[Live Demo](https://songo-playzzz.vercel.app/)
+
 SongoPlayz is a web-based music streaming platform designed to make music discovery more personalized. It combines music search, playlist management, YouTube-based playback, and mood-aware recommendations to help users discover songs based on their interests and emotions.
 
 Using Hugging Face NLP capabilities and the YouTube Data API, SongoPlayz aims to interpret natural-language queries such as *"feeling low"* or *"energetic vibes"* and help users discover relevant music.
